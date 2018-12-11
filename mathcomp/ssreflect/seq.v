@@ -1336,16 +1336,24 @@ Proof. by move=> x; rewrite -{2}(cat_take_drop n0 s) !mem_cat /= orbC. Qed.
 Lemma eqseq_rot s1 s2 : (rot n0 s1 == rot n0 s2) = (s1 == s2).
 Proof. by apply: inj_eq; apply: rot_inj. Qed.
 
+End EqSeq.
+
+Section RotIndex.
+Variables (T : eqType).
+Implicit Types x y z : T.
+
+Lemma rot_index s x (i := index x s) : x \in s ->
+  rot i s = x :: (drop i.+1 s ++ take i s).
+Proof.
+by move=> x_s; rewrite /rot (drop_nth x) ?index_mem ?nth_index// cat_cons.
+Qed.
+
 Variant rot_to_spec s x := RotToSpec i s' of rot i s = x :: s'.
 
 Lemma rot_to s x : x \in s -> rot_to_spec s x.
-Proof.
-move=> s_x; pose i := index x s; exists i (drop i.+1 s ++ take i s).
-rewrite -cat_cons {}/i; congr cat; elim: s s_x => //= y s IHs.
-by rewrite in_cons; case: eqVneq => // -> _; rewrite drop0.
-Qed.
+Proof. by move=> /rot_index /RotToSpec. Qed.
 
-End EqSeq.
+End RotIndex.
 
 Definition inE := (mem_seq1, in_cons, inE).
 
