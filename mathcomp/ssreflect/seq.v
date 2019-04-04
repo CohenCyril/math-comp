@@ -1290,7 +1290,7 @@ Qed.
 
 Lemma uniqP s : reflect {in [pred i | i < size s] &, injective (nth s)} (uniq s).
 Proof.
-apply: (iffP idP) => [????? /eqP|]; first by rewrite nth_uniq // => /eqP.
+apply: (iffP idP) => [? ? ? ? ? /eqP|]; first by rewrite nth_uniq // => /eqP.
 move=> nth_inj; apply/uniqPn => -[i [j [ltij ltjs /nth_inj ]]].
 by move=> /(_ (ltn_trans ltij ltjs)) /(_ ltjs) eq_ij; rewrite eq_ij ltnn in ltij.
 Qed.
@@ -2768,29 +2768,27 @@ Lemma allpairs_cat s1 s2 t :
     [seq f y | x <- s1, y <- t x] ++ [seq f y | x <- s2, y <- t x].
 Proof. by rewrite map_cat flatten_cat. Qed.
 
-Lemma allpairs_comp R' (g : R -> R') s t :
-  [seq g (f y) | x <- s, y <- t x] =
-    [seq g r | r <- [seq f y | x <- s, y <- t x]].
-Proof. by elim: s => //= x s ->; rewrite map_cat map_comp. Qed.
+Lemma eq_allpairs (g : forall x, T x -> R) s t : (forall x, @f x =1 g x) ->
+  [seq @f x y | x <- s, y <- t x] = [seq g x y | x <- s, y <- t x].
+Proof. by move=> fg; congr (flatten _); apply: eq_map => x; apply: eq_map. Qed.
+
+Lemma allpairs_mapl U (g : U -> S) u t :
+  [seq f y | x <- map g u, y <- t x] = [seq f y | x <- u, y <- t (g x)].
+Proof. by rewrite -map_comp. Qed.
+
+Lemma allpairs_mapr V (g : forall x, V x -> T x) s (t : forall x, seq (V x)) :
+  [seq f y | x <- s, y <- map (g x) (t x)] = [seq f (g x y) | x <- s, y <- t x].
+Proof. by rewrite -(eq_map (fun=> map_comp _ _ _)). Qed.
 
 End AllPairsDep.
 
 Arguments allpairs_dep {S T R} f s t /.
 
-Section AllPairsDepMap.
-
-Variables (S S' : Type) (T T' : S -> Type) (R : Type) (f : forall x, T x -> R).
-
-Lemma allpairs_dep_mapl (g : S' -> S) s (t : forall x : S, seq (T x)) :
-  [seq f y | x <- map g s, y <- t x] = [seq f y | x <- s, y <- t (g x)].
-Proof. by elim: s => //= x s ->. Qed.
-
-Lemma allpairs_dep_mapr (g : forall x, T' x -> T x) s
-      (t : forall x : S, seq (T' x)) :
-  [seq f y | x <- s, y <- map (g x) (t x)] = [seq f (g x y) | x <- s, y <- t x].
-Proof. by elim: s => //= x s ->; rewrite -map_comp. Qed.
-
-End AllPairsDepMap.
+Lemma map_allpairs S T R R' (f : forall x, T x -> R) (g : R -> R')
+    s (t : forall x : S, seq (T x)) :
+  [seq g r | r <- [seq f x y | x <- s, y <- t x]] =
+    [seq g (f x y) | x <- s, y <- t x].
+Proof. by rewrite map_flatten allpairs_mapl allpairs_mapr. Qed.
 
 Section AllPairsNonDep.
 
@@ -2801,7 +2799,7 @@ Definition allpairs s t := [seq f x y | x <- s, y <- t].
 
 Lemma size_allpairs s t : size [seq f x y | x <- s, y <- t] = size s * size t.
 Proof. by elim: s => //= x s IHs; rewrite size_cat size_map IHs. Qed.
-
+seq_in
 End AllPairsNonDep.
 
 Arguments allpairs {S T R} f s t /.
@@ -2812,19 +2810,20 @@ Variables (S : eqType) (T : S -> eqType).
 Implicit Types (R : eqType) (s : seq S) (t : forall x, seq (T x)).
 
 Lemma eq_in_allpairs R (f g : forall x, T x -> R) s t :
-  (forall x, x \in s -> {in t x, f x =1 g x}) ->
+  (forall x, x \in s -> {in t x, f x =1 g x}) <->
   [seq f x y | x <- s, y <- t x] = [seq g x y | x <- s, y <- t x].
 Proof.
-elim: s => //= x s ihs e; rewrite ihs.
-by congr cat; apply/eq_in_map => y; apply: (e x); rewrite inE eqxx.
-by move=> x' x'in y'; apply: (e x' _ y'); rewrite inE x'in orbT.
+split=> fg; first by congr (flatten _); do 2!apply/eq_in_map=> ??; apply: fg.
+move=> x xs; apply/eq_in_map; apply/eq_in_map: x xs.
+apply: eq_from_flatten_shape => //.
+by rewrite /shape -!map_comp/=; apply: eq_map => x/=; rewrite !size_map.
 Qed.
 
 Lemma allpairsPdep R f s t (z : R) :
   reflect (exists x y, [/\ x \in s, y \in t x & z = f x y])
           (z \in [seq f x y | x <- s, y <- t x]).
 Proof.
-apply: (iffP flatten_mapP); first by case=> x ? /mapP[y ? ->]; exists x, y.
+apply: (iffP flatten_mapP); first by case=> x xs /mapP[y ys ->]; exists x, y.
 by move=> [x [y [xs yt ->]]]; exists x => //; apply: map_f.
 Qed.
 
@@ -2856,7 +2855,7 @@ Lemma allpairs_uniq_dep R (f : forall x, T x -> R) s t
   uniq [seq f x y | x <- s, y <- t x].
 Proof.
 move=> Us Ut gI; have s_s : all (mem s) s by apply/allP.
-rewrite (allpairs_comp (fun=> Tagged T) g) map_inj_in_uniq// {f g gI R}.
+rewrite -(map_allpairs (fun=> Tagged T) g) map_inj_in_uniq// {f g gI R}.
 elim: {-1}s s_s Us => //= x s1 IHs /andP[xs s_s1] /andP[xNs1 Us1].
 rewrite cat_uniq {}IHs // andbT map_inj_in_uniq ?Ut //; last first.
   by move=> y1 y2 _ _ /eqP; rewrite eq_Tagged /= => /eqP.
@@ -2922,7 +2921,7 @@ have homo_ltn T (f : nat -> T) (r : T -> T -> Prop) : (* #201 *)
   move=> rtrans rfS x y; elim: y x => // y ihy x; rewrite ltnS leq_eqVlt.
   case/orP=> [/eqP-> // | ltxy]; apply: rtrans (rfS _); exact: ihy.
 move=> Ps_iff; have ltn_imply : {homo nth P0 Ps : m n / m < n >-> (m -> n)}.
-  apply: homo_ltn => [??? xy yz /xy /yz //|i].
+  apply: homo_ltn => [y x z xy yz /xy /yz //|i].
   elim: Ps i P0 Ps_iff => [|P [|/=Q Ps] IHPs] [|i]//= P0 [P0P Ps_iff]//=;
      do ?by [rewrite nth_nil|case: Ps_iff].
   by case: Ps_iff => [PQ Ps_iff]; apply: IHPs; split => // /P0P.
