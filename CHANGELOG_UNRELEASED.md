@@ -96,6 +96,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added ssrfun theorem `inj_compr`.
 
+- Added lemmas about `cycle`, `fconnect`, `order` and `orbit`:
+  - lemmas `mem_orbit`, `order_gt0`, `findex_eq0`, `orbit_homo`,
+  `image_orbit`,
+  - lemmas with suffix `cycle`, which all work under the precondition
+  there is a sequence `p` which is a cycle for `f`: `nextEcycle`,
+  `inj_cycle`, `homo_cycle`, `mem_orbit_cycle`, `finv_cycle`,
+  `f_finv_cycle`, `finv_f_cycle`, `finv_inj_cycle`, `fconnect2cycle`,
+  `eq_order_cycle`, `iter_order_cycle`, `iter_finv_cycle`,
+  `cycle_orbit_cycle`, `fpath_finv_cycle`, `fpath_finv_f_cycle`,
+  `fpath_f_finv_cycle`,
+  - lemmas `orbitPcycle`, `fconnect_eqVf`, `order_id_cycle`,
+    `orderPcycle`, `fconnect_f`, `fconnect_findex`.
+
+- Added lemma `rot_index` which explicits the index given by `rot_to`.
+
 ### Changed
 
 - Replaced the legacy generalised induction idiom with a more robust one

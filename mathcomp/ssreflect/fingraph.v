@@ -444,14 +444,14 @@ move=> eq_k_f x y /iter_findex <-; elim: {y}(findex x y) => //= n ->.
 by rewrite (eqP (eq_k_f _)).
 Qed.
 
-Lemma orbit_stable x : {homo f : y / y \in orbit x}.
+Lemma orbit_homo x : {homo f : y / y \in orbit x}.
 Proof.
 by move=> y; rewrite -!fconnect_orbit => /connect_trans->//; apply: fconnect1.
 Qed.
 
 Lemma image_orbit x : {subset image f (orbit x) <= orbit x}.
 Proof.
-by move=> _ /mapP[y yin ->]; apply: orbit_stable; rewrite ?mem_enum in yin.
+by move=> _ /mapP[y yin ->]; apply: orbit_homo; rewrite ?mem_enum in yin.
 Qed.
 
 Section orbit_in.
@@ -461,10 +461,10 @@ Variable S : {pred T}.
 Hypothesis f_in : {homo f : x / x \in S}.
 Hypothesis injf : {in S &, injective f}.
 
-Lemma iter_in : {in S, forall x i, iter i f x \in S}.
-Proof. by move=> x xS; elim=> [|i /f_in]. Qed.
+Lemma iter_in i : {homo iter i f : x / x \in S}.
+Proof. by move=> x xS; elim: i => [|i /f_in]. Qed.
 
-Lemma finv_in : {in S, forall x, finv x \in S}.
+Lemma finv_in : {homo finv : x / x \in S}.
 Proof. by move=> x xS; rewrite iter_in. Qed.
 
 Lemma f_finv_in : {in S, cancel finv f}.
@@ -602,7 +602,7 @@ Proof. by apply: same_connect1r x => /=. Qed.
 End orbit_inj.
 Hint Resolve orbit_uniq.
 
-Section cycle_orbit.
+Section orbit_cycle.
 Variables (p : seq T) (f_p : fcycle f p) (Up : uniq p).
 
 Section mem_cycle.
@@ -633,78 +633,84 @@ Qed.
 Lemma orbit_rot_cycle : {i : nat | orbit x = rot i p}.
 Proof. by rewrite orbitE; exists (index x p). Qed.
 
-Lemma fnextE : next p x = f x.
+Lemma nextEcycle : next p x = f x.
 Proof. by apply/eqP; rewrite eq_sym; apply: (@next_cycle _ (frel _)). Qed.
 
 End mem_cycle.
 
-Lemma cycle_inj : {in p &, injective f}.
+Lemma inj_cycle : {in p &, injective f}.
 Proof.
-move=> x y xp yp; rewrite -!fnextE//.
+move=> x y xp yp; rewrite -!nextEcycle//.
 by move=> /(congr1 (prev p)); rewrite !prev_next.
 Qed.
-Hint Resolve cycle_inj.
+Hint Resolve inj_cycle.
 
-Lemma cycle_stable : {homo f : x / x \in p}.
-Proof. by move=> x xp; rewrite -fnextE// mem_next. Qed.
-Hint Resolve cycle_stable.
+Lemma homo_cycle : {homo f : x / x \in p}.
+Proof. by move=> x xp; rewrite -nextEcycle// mem_next. Qed.
+Hint Resolve homo_cycle.
 
-Lemma cycle_order : {in p &, forall x y, order y = order x}.
-Proof. by move=> x y xp yp; rewrite -!size_orbit !orbitE ?size_rot. Qed.
+Lemma mem_orbit_cycle : {in p &, forall x, orbit x =i p}.
+Proof. by  move=> x y xp yp; rewrite orbitE// ?mem_rot. Qed.
 
-Lemma cycle_mem_orbit : {in p &, forall x y, orbit y =i orbit x}.
-Proof. by move=> x y xp yp z; rewrite !orbitE ?mem_rot. Qed.
+Lemma finv_cycle : {homo finv : x / x \in p}. Proof. exact: finv_in. Qed.
 
-Lemma cycle_iter : {in p, forall x i, iter i f x \in p}.
-Proof. exact: iter_in. Qed.
+Lemma f_finv_cycle : {in p, cancel finv f}. Proof. exact: f_finv_in. Qed.
 
-Lemma cycle_finv : {in p, forall x, finv x \in p}. Proof. exact: finv_in. Qed.
+Lemma finv_f_cycle : {in p, cancel f finv}. Proof. exact: finv_f_in. Qed.
 
-Lemma cycle_f_finv : {in p, cancel finv f}. Proof. exact: f_finv_in. Qed.
+Lemma finv_inj_cycle : {in p &, injective finv}. Proof. exact: finv_inj_in. Qed.
 
-Lemma cycle_finv_f : {in p, cancel f finv}. Proof. exact: finv_f_in. Qed.
+Lemma fconnect2cycle : {in p &, forall x y, fconnect f x y}.
+Proof. by move=> x y xp yp; rewrite !fconnect_cycle. Qed.
 
-Lemma cycle_finv_inj : {in p &, injective finv}. Proof. exact: finv_inj_in. Qed.
+Lemma eq_order_cycle : {in p &, forall x y, order y = order x}.
+Proof. by move=> x y xp yp; rewrite !order_cycle. Qed.
 
-Lemma cycle_fconnect : {in p &, forall x y, fconnect f x y}.
-Proof. by move=> x y xp yp; rewrite fconnect_orbit orbitE ?mem_rot. Qed.
-
-Lemma cycle_iter_order : {in p &, forall x y, iter (order x) f y = y}.
+Lemma iter_order_cycle : {in p &, forall x y, iter (order x) f y = y}.
 Proof.
-by move=> x y xp yp; rewrite (cycle_order yp xp) (iter_order_in cycle_stable).
+by move=> x y xp yp; rewrite (eq_order_cycle yp) ?(iter_order_in homo_cycle).
 Qed.
 
-Lemma cycle_iter_finv n :
+Lemma iter_finv_cycle n :
   {in p, forall x, n <= order x -> iter n finv x = iter (order x - n) f x}.
 Proof. exact: iter_finv_in. Qed.
 
-Lemma cycle_cycle_orbit : {in p, forall x, (fcycle f) (orbit x)}.
+Lemma cycle_orbit_cycle : {in p, forall x, (fcycle f) (orbit x)}.
 Proof. exact: cycle_orbit_in. Qed.
 
-Lemma cycle_fpath_finv q x : (x \in p) && (fpath finv x q) =
+Lemma fpath_finv_cycle q x : (x \in p) && (fpath finv x q) =
   (last x q \in p) && (fpath f (last x q) (rev (belast x q))).
 Proof. exact: fpath_finv_in. Qed.
 
-Lemma cycle_fpath_finv_f q : {in p, forall x,
+Lemma fpath_finv_f_cycle q : {in p, forall x,
   fpath finv x q -> fpath f (last x q) (rev (belast x q))}.
 Proof. exact: fpath_finv_f_in. Qed.
 
-Lemma cycle_fpath_f_finv q x : last x q \in p ->
+Lemma fpath_f_finv_cycle q x : last x q \in p ->
   fpath f (last x q) (rev (belast x q)) -> fpath finv x q.
 Proof. exact: fpath_f_finv_in. Qed.
 
-End cycle_orbit.
+End orbit_cycle.
 
-Section fconnect_f.
+Section fconnect.
 
-Lemma cycle_orbitP x : [<->
+(*****************************************************************************)
+(* Lemma orbitPcycle is of type "The Following Are Equivalent", which means  *)
+(* all four statements are equivalent to each other. In order to use it, one *)
+(* has to apply it to the natural numbers corresponding to the line, e.g.    *)
+(* `orbitPcycle 0 2 : fcycle f (orbit x) <-> exists k, iter k.+1 f x = x`.   *)
+(* examples of this are in order_id_cycle and fconnnect_f.                   *)
+(* One may also use lemma all_iffLR to get a one sided impliciation, as in   *)
+(* orderPcycle.                                                              *)
+(*****************************************************************************)
+Lemma orbitPcycle {x} : [<->
   (* 0 *) fcycle f (orbit x) : Prop;
   (* 1 *) fconnect f (f x) x : Prop;
   (* 2 *) exists k, iter k.+1 f x = x;
   (* 3 *) iter (order x) f x = x].
 Proof.
 do ![apply: AllIffConj] => [xorbit_cycle|f_fix|[k]|fix_x].
-- by rewrite (@cycle_fconnect (orbit x))// cycle_stable.
+- by rewrite (@fconnect_cycle (orbit x))// homo_cycle.
 - by exists (findex (f x) x); rewrite // iterSr iter_findex.
 - wlog : k / k < order x => [hwlog|].
     by have /loopingP /(_ k) /trajectP[i ?/=->/hwlog->] := looping_order x.
@@ -722,43 +728,45 @@ apply/idP/idP => [/iter_findex <-|/predU1P [<-|] //]; last first.
 by case: findex => [|i]; rewrite ?eqxx// iterSr fconnect_iter orbT.
 Qed.
 
-Lemma cycle_order_id x : fcycle f (orbit x) -> order (f x) = order x.
+Lemma order_id_cycle x : fcycle f (orbit x) -> order (f x) = order x.
 Proof.
-move=> /(cycle_orbitP _ 0 1)/= fx_x; apply: eq_card => y; rewrite !inE.
+move=> /(orbitPcycle 0 1)/= fx_x; apply: eq_card => y; rewrite !inE.
 by apply/idP/idP; apply/connect_trans => //; apply/fconnect1.
 Qed.
 
-Inductive cycle_order_spec x : bool -> Type :=
+Inductive order_spec_cycle x : bool -> Type :=
 | OrderStepCycle of fcycle f (orbit x) & order x = order (f x) :
-    cycle_order_spec x true
+    order_spec_cycle x true
 | OrderStepNoCycle of ~~ fcycle f (orbit x) & order x = (order (f x)).+1 :
-    cycle_order_spec x false.
+    order_spec_cycle x false.
 
-Lemma cycle_orderP x : cycle_order_spec x (fcycle f (orbit x)).
+Lemma orderPcycle x : order_spec_cycle x (fcycle f (orbit x)).
 Proof.
 have [xcycle|Ncycle] := boolP (fcycle f (orbit x)); constructor => //.
-  by rewrite cycle_order_id.
+  by rewrite order_id_cycle.
 rewrite /order (eq_card (_ : _ =1 [predU1 x & fconnect f (f x)])).
-  by rewrite cardU1 inE (contraNN (all_iffLR (cycle_orbitP _) 1 0)).
+  by rewrite cardU1 inE (contraNN (all_iffLR orbitPcycle 1 0)).
 by move=> y; rewrite !inE fconnect_eqVf eq_sym.
 Qed.
 
 Lemma fconnect_f x : fconnect f (f x) x = fcycle f (orbit x).
-Proof. by apply/idP/idP => /(cycle_orbitP x 0 1). Qed.
+Proof. by apply/idP/idP => /(orbitPcycle 0 1). Qed.
 
 Lemma fconnect_findex x y :
   fconnect f x y -> y != x -> findex x y = (findex (f x) y).+1.
 Proof.
 rewrite /findex fconnect_orbit /orbit -orderSpred /= inE => /orP [-> //|].
-rewrite eq_sym; move=> yin /negPf->; have [_ eq_o|_ ->//] := cycle_orderP x.
+rewrite eq_sym; move=> yin /negPf->; have [_ eq_o|_ ->//] := orderPcycle x.
 by rewrite -(orderSpred (f x)) trajectSr -cats1 index_cat -eq_o yin.
 Qed.
 
-End fconnect_f.
+End fconnect.
 
 End Orbit.
 
+Hint Resolve mem_orbit order_gt0 orbit_uniq.
 Prenex Implicits order orbit findex finv order_set.
+Arguments orbitPcycle {T f x}.
 
 Section FconnectId.
 
