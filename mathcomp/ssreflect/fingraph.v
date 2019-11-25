@@ -606,7 +606,7 @@ Section mem_cycle.
 Variable x : T.
 Hypothesis p_x : x \in p.
 
-(* Lemma fconnect_cycle, nextE and prevE do not depend on Up : uniq p *)
+(* Lemma fconnect_cycle and nextE do not depend on Up : uniq p *)
 Lemma fconnect_cycle y : fconnect f x y = (y \in p).
 Proof.
 have [i q def_p] := rot_to p_x; rewrite -(mem_rot i p) def_p.
