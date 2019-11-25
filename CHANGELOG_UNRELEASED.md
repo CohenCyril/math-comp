@@ -100,7 +100,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - lemmas `mem_orbit`, `order_gt0`, `findex_eq0`, `orbit_homo`,
   `image_orbit`,
   - lemmas with suffix `cycle`, which all work under the precondition
-  there is a sequence `p` which is a cycle for `f`: `nextEcycle`,
+  there is a sequence `p` which is a cycle for `f`: `nextE`, `prevE`,
   `inj_cycle`, `homo_cycle`, `mem_orbit_cycle`, `finv_cycle`,
   `f_finv_cycle`, `finv_f_cycle`, `finv_inj_cycle`, `fconnect2cycle`,
   `eq_order_cycle`, `iter_order_cycle`, `iter_finv_cycle`,
@@ -110,6 +110,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `orderPcycle`, `fconnect_f`, `fconnect_findex`.
 
 - Added lemma `rot_index` which explicits the index given by `rot_to`.
+
+- Added tactic `tfae` to split an equivalence between n+1 propositions
+  into n+1 goals, and referenced orbitPcycle as a reference of use.
 
 ### Changed
 
@@ -144,6 +147,10 @@ new `ssrnat` helper lemmas `ltn_ind`, `ubnP`, `ubnPleq`,  ...., (see above). The
   + The compatibility layer for the version 1.9 is provided as the
     `ssrnat.mc_1_9` module. One may compile proofs compatible with the version
     1.9 in newer versions by using this module.
+
+- Moved `iter_in` to ssrnat and reordered its arguments.
+
+- Notation `[<-> P0 ; .. ; Pn]` now forces `Pi` to be of type `Prop`.
 
 ### Removed
 

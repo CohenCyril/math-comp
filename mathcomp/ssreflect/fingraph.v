@@ -396,10 +396,10 @@ exact: fconnect_iter.
 Qed.
 
 Lemma mem_orbit x : x \in orbit x. Proof. by rewrite -fconnect_orbit. Qed.
-Hint Resolve mem_orbit.
+Hint Resolve mem_orbit : core.
 
 Lemma order_gt0 x : order x > 0. Proof. by rewrite -orderSpred. Qed.
-Hint Resolve order_gt0.
+Hint Resolve order_gt0 : core.
 
 Lemma orbit_uniq x : uniq (orbit x).
 Proof.
@@ -461,9 +461,6 @@ Variable S : {pred T}.
 Hypothesis f_in : {homo f : x / x \in S}.
 Hypothesis injf : {in S &, injective f}.
 
-Lemma iter_in i : {homo iter i f : x / x \in S}.
-Proof. by move=> x xS; elim: i => [|i /f_in]. Qed.
-
 Lemma finv_in : {homo finv : x / x \in S}.
 Proof. by move=> x xS; rewrite iter_in. Qed.
 
@@ -472,7 +469,7 @@ Proof.
 move=> x xS; move: (looping_order x) (orbit_uniq x).
 rewrite /looping /orbit -orderSpred looping_uniq /= /looping; set n := _.-1.
 case/predU1P=> // /trajectP[i lt_i_n]; rewrite -iterSr.
-by move=> /injf ->; rewrite ?iter_in //; case/trajectP; exists i.
+by move=> /injf ->; rewrite ?(iter_in _ f_in) //; case/trajectP; exists i.
 Qed.
 
 Lemma finv_f_in : {in S, cancel f finv}.
@@ -600,7 +597,7 @@ Lemma same_fconnect1_r x y : fconnect f x y = fconnect f x (f y).
 Proof. by apply: same_connect1r x => /=. Qed.
 
 End orbit_inj.
-Hint Resolve orbit_uniq.
+Hint Resolve orbit_uniq : core.
 
 Section orbit_cycle.
 Variables (p : seq T) (f_p : fcycle f p) (Up : uniq p).
@@ -609,7 +606,7 @@ Section mem_cycle.
 Variable x : T.
 Hypothesis p_x : x \in p.
 
-(* This lemma does not depend on Up : uniq p *)
+(* Lemma fconnect_cycle, nextE and prevE do not depend on Up : uniq p *)
 Lemma fconnect_cycle y : fconnect f x y = (y \in p).
 Proof.
 have [i q def_p] := rot_to p_x; rewrite -(mem_rot i p) def_p.
@@ -620,8 +617,11 @@ case/fpathP: f_q q_x => n ->; rewrite !last_traject -iterS => def_x.
 by apply: (@loopingP _ f x n.+1); rewrite /looping def_x /= mem_head.
 Qed.
 
+Lemma nextE : next p x = f x.
+Proof. exact/esym/eqP/(next_cycle f_p). Qed.
+
 Lemma order_cycle : order x = size p.
-Proof. by rewrite -(card_uniqP Up); apply (eq_card fconnect_cycle). Qed.
+Proof. by rewrite -(card_uniqP Up); apply: (eq_card fconnect_cycle). Qed.
 
 Lemma orbitE : orbit x = rot (index x p) p.
 Proof.
@@ -633,24 +633,20 @@ Qed.
 Lemma orbit_rot_cycle : {i : nat | orbit x = rot i p}.
 Proof. by rewrite orbitE; exists (index x p). Qed.
 
-Lemma nextEcycle : next p x = f x.
-Proof. by apply/eqP; rewrite eq_sym; apply: (@next_cycle _ (frel _)). Qed.
-
 End mem_cycle.
 
 Lemma inj_cycle : {in p &, injective f}.
 Proof.
-move=> x y xp yp; rewrite -!nextEcycle//.
-by move=> /(congr1 (prev p)); rewrite !prev_next.
+by move=> x y xp yp /(congr1 (prev p)); rewrite -!nextE ?prev_next.
 Qed.
-Hint Resolve inj_cycle.
+Hint Resolve inj_cycle : core.
 
 Lemma homo_cycle : {homo f : x / x \in p}.
-Proof. by move=> x xp; rewrite -nextEcycle// mem_next. Qed.
-Hint Resolve homo_cycle.
+Proof. by move=> x xp; rewrite -nextE// mem_next. Qed.
+Hint Resolve homo_cycle : core.
 
 Lemma mem_orbit_cycle : {in p &, forall x, orbit x =i p}.
-Proof. by  move=> x y xp yp; rewrite orbitE// ?mem_rot. Qed.
+Proof. by move=> x y xp yp; rewrite orbitE// ?mem_rot. Qed.
 
 Lemma finv_cycle : {homo finv : x / x \in p}. Proof. exact: finv_in. Qed.
 
@@ -690,6 +686,11 @@ Lemma fpath_f_finv_cycle q x : last x q \in p ->
   fpath f (last x q) (rev (belast x q)) -> fpath finv x q.
 Proof. exact: fpath_f_finv_in. Qed.
 
+Lemma prevE x : x \in p -> prev p x = finv x.
+Proof.
+by move=> x_p; rewrite -{1}[x]f_finv_cycle// -{1}nextE ?finv_in ?prev_next.
+Qed.
+
 End orbit_cycle.
 
 Section fconnect.
@@ -704,12 +705,12 @@ Section fconnect.
 (* orderPcycle.                                                              *)
 (*****************************************************************************)
 Lemma orbitPcycle {x} : [<->
-  (* 0 *) fcycle f (orbit x) : Prop;
-  (* 1 *) fconnect f (f x) x : Prop;
+  (* 0 *) fcycle f (orbit x);
+  (* 1 *) fconnect f (f x) x;
   (* 2 *) exists k, iter k.+1 f x = x;
   (* 3 *) iter (order x) f x = x].
 Proof.
-do ![apply: AllIffConj] => [xorbit_cycle|f_fix|[k]|fix_x].
+tfae=> [xorbit_cycle|f_fix|[k]|fix_x].
 - by rewrite (@fconnect_cycle (orbit x))// homo_cycle.
 - by exists (findex (f x) x); rewrite // iterSr iter_findex.
 - wlog : k / k < order x => [hwlog|].
@@ -764,7 +765,7 @@ End fconnect.
 
 End Orbit.
 
-Hint Resolve mem_orbit order_gt0 orbit_uniq.
+Hint Resolve mem_orbit order_gt0 orbit_uniq : core.
 Prenex Implicits order orbit findex finv order_set.
 Arguments orbitPcycle {T f x}.
 

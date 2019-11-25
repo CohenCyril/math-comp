@@ -180,11 +180,16 @@ From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat.
 (*  if T : [<-> P0; P1; ..; Pn]  is such an equivalence, and i, j are in nat  *)
 (*  then T i j is a proof of the equivalence Pi <-> Pj between Pi and Pj;     *)
 (*  when i (resp. j) is out of bounds, Pi (resp. Pj) defaults to P0.          *)
+(*  The tactic tfae splits the goal into n+1 implications to prove.           *)
+(*  An example of use can be found in fingraph theorem orbitPcycle.           *)
 (******************************************************************************)
 
 Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
+
+Reserved Notation "[ '<->' P0 ; P1 ; .. ; Pn ]"
+  (at level 0, format "[ '<->' '['  P0 ;  '/' P1 ;  '/'  .. ;  '/'  Pn ']' ]").
 
 Delimit Scope seq_scope with SEQ.
 Open Scope seq_scope.
@@ -3334,8 +3339,8 @@ Definition all_iff (P0 : Prop) (Ps : seq Prop) : Prop :=
     if Qs is Q :: Qs then all_iff_and (P -> Q) (loop Q Qs) else P -> P0 in
   loop P0 Ps.
 
-Lemma all_iffLR P0 Ps :
-   all_iff P0 Ps -> forall m n, nth P0 (P0 :: Ps) m -> nth P0 (P0 :: Ps) n.
+Lemma all_iffLR P0 Ps : all_iff P0 Ps ->
+  forall m n, nth P0 (P0 :: Ps) m -> nth P0 (P0 :: Ps) n.
 Proof.
 move=> iffPs; have PsS n: nth P0 Ps n -> nth P0 Ps n.+1.
   elim: n P0 Ps iffPs => [|n IHn] P0 [|P [|Q Ps]] //= [iP0P] //; first by case.
@@ -3360,9 +3365,10 @@ Arguments all_iffP {P0 Ps}.
 Coercion all_iffP : all_iff >-> Funclass.
 
 (* This means "the following are all equivalent: P0, ... Pn" *)
-Notation "[ '<->' P0 ; P1 ; .. ; Pn ]" := (all_iff P0 (P1 :: .. [:: Pn] ..))
-  (at level 0, format "[ '<->' '['  P0 ;  '/' P1 ;  '/'  .. ;  '/'  Pn ']' ]")
-  : form_scope.
+Notation "[ '<->' P0 ; P1 ; .. ; Pn ]" :=
+  (all_iff P0 (@cons Prop P1 (.. (@cons Prop Pn nil) ..))) : form_scope.
+
+Ltac tfae := do !apply: AllIffConj.
 
 (* Temporary backward compatibility. *)
 Notation perm_eqP := (deprecate perm_eqP permP) (only parsing).
