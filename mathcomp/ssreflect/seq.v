@@ -389,6 +389,11 @@ Lemma nth_rcons s x n :
     if n < size s then nth s n else if n == size s then x else x0.
 Proof. by elim: s n => [|y s IHs] [] //=; apply: nth_nil. Qed.
 
+Lemma nth_rcons_default s i : nth (rcons s x0) i = nth s i.
+Proof.
+by rewrite nth_rcons; case: ltngtP => //[/ltnW ?|->]; rewrite nth_default.
+Qed.
+
 Lemma nth_ncons m x s n :
   nth (ncons m x s) n = if n < m then x else nth s (n - m).
 Proof. by elim: m n => [|m IHm] []. Qed.
@@ -1279,6 +1284,31 @@ Qed.
 
 Lemma undup_nil s : undup s = [::] -> s = [::].
 Proof. by case: s => //= x s; rewrite -mem_undup; case: ifP; case: undup. Qed.
+
+Lemma undup_rcons s x :
+  undup (rcons s x) = rcons [seq y <- undup s | y != x] x.
+Proof.
+elim: s => [|/= y s ->]//; rewrite mem_rcons in_cons.
+have [->|neq_yx]//= := eqVneq; first by case: ifP; rewrite /= ?eqxx.
+by case: ifPn => //= yNs; rewrite neq_yx.
+Qed.
+
+Lemma undup_cat s t :
+  undup (s ++ t) = [seq x <- undup s | x \notin t] ++ undup t.
+Proof.
+elim: t => [|/= x t IHt] in s *; first by rewrite !cats0 filter_predT.
+rewrite -cat_rcons IHt undup_rcons filter_rcons -filter_predI.
+have [/=xt|/=xNt] := boolP (x \in t); rewrite -?cat_rcons; congr cat.
+  by apply: eq_filter => y/=; rewrite inE negb_or andbC.
+by congr rcons; apply: eq_filter => y/=; rewrite inE negb_or andbC.
+Qed.
+
+Lemma undup_iter_cat n (s : seq T) : 0 < n -> undup (iter n (cat s) [::]) = undup s.
+Proof.
+case: n => [//|n _]; elim: n => [//=|n IHn]; first by rewrite cats0.
+rewrite iterS undup_cat IHn (@eq_in_filter _ pred0) ?filter_pred0// => x.
+by rewrite /= mem_undup mem_cat => ->.
+Qed.
 
 (* Lookup *)
 

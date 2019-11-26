@@ -600,13 +600,14 @@ End orbit_inj.
 Hint Resolve orbit_uniq : core.
 
 Section orbit_cycle.
-Variables (p : seq T) (f_p : fcycle f p) (Up : uniq p).
+Section fcycle_p.
+Variables (p : seq T) (f_p : fcycle f p).
 
 Section mem_cycle.
-Variable x : T.
-Hypothesis p_x : x \in p.
 
-(* Lemma fconnect_cycle and nextE do not depend on Up : uniq p *)
+Variable (Up : uniq p) (x : T) (p_x : x \in p).
+
+(* fconnect_cycle does not dependent on Up *)
 Lemma fconnect_cycle y : fconnect f x y = (y \in p).
 Proof.
 have [i q def_p] := rot_to p_x; rewrite -(mem_rot i p) def_p.
@@ -617,8 +618,12 @@ case/fpathP: f_q q_x => n ->; rewrite !last_traject -iterS => def_x.
 by apply: (@loopingP _ f x n.+1); rewrite /looping def_x /= mem_head.
 Qed.
 
-Lemma nextE : next p x = f x.
-Proof. exact/esym/eqP/(next_cycle f_p). Qed.
+(* order_le_cycle does not dependent on Up *)
+Lemma order_le_cycle : order x <= size p.
+Proof.
+apply: leq_trans (card_size _); apply/subset_leq_card/subsetP=> y.
+by rewrite !(fconnect_cycle, inE) ?eqxx.
+Qed.
 
 Lemma order_cycle : order x = size p.
 Proof. by rewrite -(card_uniqP Up); apply: (eq_card fconnect_cycle). Qed.
@@ -635,18 +640,8 @@ Proof. by rewrite orbitE; exists (index x p). Qed.
 
 End mem_cycle.
 
-Lemma inj_cycle : {in p &, injective f}.
-Proof.
-by move=> x y xp yp /(congr1 (prev p)); rewrite -!nextE ?prev_next.
-Qed.
-Hint Resolve inj_cycle : core.
-
-Lemma homo_cycle : {homo f : x / x \in p}.
-Proof. by move=> x xp; rewrite -nextE// mem_next. Qed.
-Hint Resolve homo_cycle : core.
-
-Lemma mem_orbit_cycle : {in p &, forall x, orbit x =i p}.
-Proof. by move=> x y xp yp; rewrite orbitE// ?mem_rot. Qed.
+Let f_inj := inj_cycle f_p.
+Let homo_f := homo_cycle f_p.
 
 Lemma finv_cycle : {homo finv : x / x \in p}. Proof. exact: finv_in. Qed.
 
@@ -655,17 +650,6 @@ Lemma f_finv_cycle : {in p, cancel finv f}. Proof. exact: f_finv_in. Qed.
 Lemma finv_f_cycle : {in p, cancel f finv}. Proof. exact: finv_f_in. Qed.
 
 Lemma finv_inj_cycle : {in p &, injective finv}. Proof. exact: finv_inj_in. Qed.
-
-Lemma fconnect2cycle : {in p &, forall x y, fconnect f x y}.
-Proof. by move=> x y xp yp; rewrite !fconnect_cycle. Qed.
-
-Lemma eq_order_cycle : {in p &, forall x y, order y = order x}.
-Proof. by move=> x y xp yp; rewrite !order_cycle. Qed.
-
-Lemma iter_order_cycle : {in p &, forall x y, iter (order x) f y = y}.
-Proof.
-by move=> x y xp yp; rewrite (eq_order_cycle yp) ?(iter_order_in homo_cycle).
-Qed.
 
 Lemma iter_finv_cycle n :
   {in p, forall x, n <= order x -> iter n finv x = iter (order x - n) f x}.
@@ -688,8 +672,83 @@ Proof. exact: fpath_f_finv_in. Qed.
 
 Lemma prevE x : x \in p -> prev p x = finv x.
 Proof.
-by move=> x_p; rewrite -{1}[x]f_finv_cycle// -{1}nextE ?finv_in ?prev_next.
+move=> x_p; have /eqP/(congr1 finv) := prev_cycle f_p x_p.
+by rewrite finv_f_cycle// mem_prev.
 Qed.
+
+End fcycle_p.
+
+Section fcycle_cons.
+Variables (x : T) (p : seq T) (f_p : fcycle f (x :: p)).
+
+Lemma fcycle_rconsE : rcons (x :: p) x = traject f x (size p).+2.
+Proof. by rewrite rcons_cons; have /fpathE-> := f_p; rewrite size_rcons. Qed.
+
+Lemma fcycle_consE : x :: p = traject f x (size p).+1.
+Proof. by have := fcycle_rconsE; rewrite trajectSr => /rcons_inj[/= <-]. Qed.
+
+Lemma fcycle_consEiter_cat : exists k, x :: p = iter k.+1 (cat (orbit x)) [::].
+Proof.
+move: f_p; rewrite fcycle_consE; elim/ltn_ind: (size p) => n IHn t_cycle.
+have := order_le_cycle t_cycle (mem_head _ _); rewrite size_traject.
+case: ltngtP => //; last by move<-; exists 0; rewrite /= cats0.
+rewrite ltnS => n_ge _; have := t_cycle.
+rewrite -(subnKC n_ge) -addnS trajectD.
+rewrite (iter_order_in (homo_cycle f_p) (inj_cycle f_p)) ?mem_head//.
+set m := (_ - _) => cycle_cat.
+have [||k->] := IHn m; last by exists k.+1.
+  by rewrite ltn_subrL (leq_trans _ n_ge) ?order_gt0.
+move: cycle_cat; rewrite -orderSpred/= rcons_cat rcons_cons -cat_rcons.
+by rewrite cat_path last_rcons => /andP[].
+Qed.
+
+Lemma undup_cycle_cons : undup (x :: p) = orbit x.
+Proof.
+by have [n {1}->] := fcycle_consEiter_cat; rewrite undup_iter_cat ?undup_id.
+Qed.
+
+End fcycle_cons.
+
+Section fcycle_undup.
+
+Variable (p : seq T) (f_p : fcycle f p).
+
+Lemma fcycleEiter_cat : exists k, p = iter k (cat (undup p)) [::].
+Proof.
+case: p f_p => [//|x q] f_q; first by exists 0.
+have [k {1}->] := @fcycle_consEiter_cat x q f_q.
+by exists k.+1; rewrite undup_cycle_cons.
+Qed.
+
+Lemma fcycle_undup : fcycle f (undup p).
+Proof.
+case: p f_p => [//|x q] f_q; rewrite undup_cycle_cons//.
+by rewrite (cycle_orbit_in (homo_cycle f_q) (inj_cycle f_q)) ?mem_head.
+Qed.
+
+Let p_undup_uniq := undup_uniq p.
+Let f_inj := inj_cycle f_p.
+Let homo_f := homo_cycle f_p.
+
+Lemma mem_orbit_cycle : {in p &, forall x, orbit x =i p}.
+Proof.
+by move=> x y xp yp; rewrite (orbitE fcycle_undup)// ?mem_rot ?mem_undup.
+Qed.
+
+Lemma fconnect2cycle : {in p &, forall x y, fconnect f x y}.
+Proof. by move=> x y xp yp; rewrite !(fconnect_cycle f_p). Qed.
+
+Lemma eq_order_cycle : {in p &, forall x y, order y = order x}.
+Proof.
+by move=> x y xp yp; rewrite !(order_cycle fcycle_undup) ?mem_undup.
+Qed.
+
+Lemma iter_order_cycle : {in p &, forall x y, iter (order x) f y = y}.
+Proof.
+by move=> x y xp yp; rewrite (eq_order_cycle yp) ?(iter_order_in homo_f f_inj).
+Qed.
+
+End fcycle_undup.
 
 End orbit_cycle.
 

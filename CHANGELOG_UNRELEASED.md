@@ -30,6 +30,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added theorems `flatten_map1`, `allpairs_consr`, `mask_filter`,
   `all_filter`, `all_pmap`, and `all_allpairsP` in `seq.v`.
 
+- Added theorems `nth_rcons_default`, `undup_rcons`, `undup_cat` and
+  `undup_iter_cat` in `seq.v`
+
 - Fintype theorems: `fintype0`, `card_le1P`, `mem_card1`,
   `card1P`, `fintype_le1P`, `fintype1`, `fintype1P`,
   `existsPn`, `exists_inPn`, `forallPn`, `forall_inPn`,
@@ -58,8 +61,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
        `edivnS`, `divnS`, `modnS`, `edivn_pred`, `divn_pred` and
        `modn_pred`.
 
-- Added map/parametricity theorems about `path`, `sort` and `sorted`:
-
 - Added `mem2E` in `path.v`.
 
 - Added `sort_rec1` and `sortE` to help inductive reasoning on `sort`.
@@ -68,6 +69,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `homo_path`, `mono_path`, `homo_path_in`, `mono_path_in`,
   `homo_sorted`, `mono_sorted`, `map_merge`, `merge_map`, `map_sort`,
   `sort_map`, `sorted_map`, `homo_sorted_in`, `mono_sorted_in`.
+
+- Added theorems `take_traject` and `trajectD` in `path.v`
+
+- Extracting lemma `pathE` from `pathP`, and shortening the proof of
+  the latter.
 
 - Added the theorem `perm_iota_sort` to express that the sorting of
   any sequence `s` is equal to a mapping of `iota 0 (size s)` to the
@@ -79,8 +85,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `filter_sort`, `mask_sort`, `sorted_mask_sort`, `subseq_sort`,
   `sorted_subseq_sort`, and `mem2_sort`.
 
-- New algebraic interfaces : comAlgebra and comUnitAlgebra for
-  commutative and commutative-unitary algebras.
+- New algebraic interfaces in `ssralg.v`: comAlgebra and
+  comUnitAlgebra for commutative and commutative-unitary algebras.
 
 - Initial property for polynomials in algebras:
   New canonical lrMoprphism `horner_alg` evaluating a polynomial in an element
@@ -96,16 +102,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added ssrfun theorem `inj_compr`.
 
-- Added lemmas about `cycle`, `fconnect`, `order` and `orbit`:
+- Added lemmas `nextE`, `homo_cycle` and `inj_cycle` in `path.v`
+
+- Added lemmas about `cycle`, `fconnect`, `order` and `orbit` in
+  `fingraph.v`:
   - lemmas `mem_orbit`, `order_gt0`, `findex_eq0`, `orbit_homo`,
   `image_orbit`,
-  - lemmas with suffix `cycle`, which all work under the precondition
-  there is a sequence `p` which is a cycle for `f`: `nextE`, `prevE`,
-  `inj_cycle`, `homo_cycle`, `mem_orbit_cycle`, `finv_cycle`,
-  `f_finv_cycle`, `finv_f_cycle`, `finv_inj_cycle`, `fconnect2cycle`,
-  `eq_order_cycle`, `iter_order_cycle`, `iter_finv_cycle`,
-  `cycle_orbit_cycle`, `fpath_finv_cycle`, `fpath_finv_f_cycle`,
-  `fpath_f_finv_cycle`,
+  - lemmas `fcycle_rconsE`, `fcycle_consE`, `fcycle_consEiter_cat` and
+    `undup_cycle_cons` which operate under the precondition that the
+    sequence `x :: p` is a cycle for f (i.e. `fcycle f (x :: p)`).
+  - lemmas which operate under the precondition there is a sequence
+    `p` which is a cycle for `f` (i.e. `fcycle f p`):
+    `order_le_cycle`, `finv_cycle`, `f_finv_cycle`, `finv_f_cycle`,
+    `finv_inj_cycle`, `iter_finv_cycle`, `cycle_orbit_cycle`,
+    `fpath_finv_cycle`, `fpath_finv_f_cycle`, `fpath_f_finv_cycle`,
+    `prevE`, `fcycleEiter_cat`, `fcycle_undup`, `mem_orbit_cycle`,
+    `fconnect2cycle`, `eq_order_cycle`, `iter_order_cycle`,
   - lemmas `orbitPcycle`, `fconnect_eqVf`, `order_id_cycle`,
     `orderPcycle`, `fconnect_f`, `fconnect_findex`.
 
