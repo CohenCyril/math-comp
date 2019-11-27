@@ -648,7 +648,7 @@ Proof. by rewrite orbitE; exists (index x p). Qed.
 End mem_cycle.
 
 Let f_inj := inj_cycle f_p.
-Let homo_f := homo_cycle f_p.
+Let homo_f := mem_fcycle f_p.
 
 Lemma finv_cycle : {homo finv : x / x \in p}. Proof. exact: finv_in. Qed.
 
@@ -701,7 +701,7 @@ have := order_le_cycle t_cycle (mem_head _ _); rewrite size_traject.
 case: ltngtP => //; last by move<-; exists 0; rewrite /= cats0.
 rewrite ltnS => n_ge _; have := t_cycle.
 rewrite -(subnKC n_ge) -addnS trajectD.
-rewrite (iter_order_in (homo_cycle f_p) (inj_cycle f_p)) ?mem_head//.
+rewrite (iter_order_in (mem_fcycle f_p) (inj_cycle f_p)) ?mem_head//.
 set m := (_ - _) => cycle_cat.
 have [||k->] := IHn m; last by exists k.+1.
   by rewrite ltn_subrL (leq_trans _ n_ge) ?order_gt0.
@@ -730,12 +730,12 @@ Qed.
 Lemma fcycle_undup : fcycle f (undup p).
 Proof.
 case: p f_p => [//|x q] f_q; rewrite undup_cycle_cons//.
-by rewrite (cycle_orbit_in (homo_cycle f_q) (inj_cycle f_q)) ?mem_head.
+by rewrite (cycle_orbit_in (mem_fcycle f_q) (inj_cycle f_q)) ?mem_head.
 Qed.
 
 Let p_undup_uniq := undup_uniq p.
 Let f_inj := inj_cycle f_p.
-Let homo_f := homo_cycle f_p.
+Let homo_f := mem_fcycle f_p.
 
 Lemma in_orbit_cycle : {in p &, forall x, orbit x =i p}.
 Proof.

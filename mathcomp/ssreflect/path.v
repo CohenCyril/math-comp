@@ -1092,7 +1092,7 @@ Variables (T : eqType) (f : T -> T) (p : seq T) (f_p : fcycle f p).
 Lemma nextE (x : T) (p_x : x \in p) : next p x = f x.
 Proof. exact/esym/eqP/(next_cycle f_p). Qed.
 
-Lemma homo_cycle : {homo f : x / x \in p}.
+Lemma mem_fcycle : {homo f : x / x \in p}.
 Proof. by move=> x xp; rewrite -nextE// mem_next. Qed.
 
 Lemma inj_cycle : {in p &, injective f}.

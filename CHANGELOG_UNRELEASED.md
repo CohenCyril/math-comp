@@ -102,7 +102,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added ssrfun theorem `inj_compr`.
 
-- Added lemmas `nextE`, `homo_cycle` and `inj_cycle` in `path.v`
+- Added lemmas `nextE`, `mem_fcycle` and `inj_cycle` in `path.v`
 
 - Added lemmas about `cycle`, `fconnect`, `order` and `orbit` in
   `fingraph.v`:
