@@ -395,8 +395,8 @@ apply/idP/idP=> [/connectP[_ /fpathP[m ->] ->] | /trajectP[i _ ->]].
 exact: fconnect_iter.
 Qed.
 
-Lemma mem_orbit x : x \in orbit x. Proof. by rewrite -fconnect_orbit. Qed.
-Hint Resolve mem_orbit : core.
+Lemma in_orbit x : x \in orbit x. Proof. by rewrite -fconnect_orbit. Qed.
+Hint Resolve in_orbit : core.
 
 Lemma order_gt0 x : order x > 0. Proof. by rewrite -orderSpred. Qed.
 Hint Resolve order_gt0 : core.
@@ -444,14 +444,14 @@ move=> eq_k_f x y /iter_findex <-; elim: {y}(findex x y) => //= n ->.
 by rewrite (eqP (eq_k_f _)).
 Qed.
 
-Lemma in_orbit x : {homo f : y / y \in orbit x}.
+Lemma mem_orbit x : {homo f : y / y \in orbit x}.
 Proof.
 by move=> y; rewrite -!fconnect_orbit => /connect_trans->//; apply: fconnect1.
 Qed.
 
 Lemma image_orbit x : {subset image f (orbit x) <= orbit x}.
 Proof.
-by move=> _ /mapP[y yin ->]; apply: in_orbit; rewrite ?mem_enum in yin.
+by move=> _ /mapP[y yin ->]; apply: mem_orbit; rewrite ?mem_enum in yin.
 Qed.
 
 Section orbit_in.
@@ -530,7 +530,7 @@ Lemma injectivePcycle x :
   reflect {in orbit x &, injective f} (fcycle f (orbit x)).
 Proof.
 apply: (iffP idP) => [/inj_cycle//|/cycle_orbit_in].
-by apply; [apply: in_orbit|apply: mem_orbit].
+by apply; [apply: mem_orbit|apply: in_orbit].
 Qed.
 
 Section orbit_inj.
@@ -737,7 +737,7 @@ Let p_undup_uniq := undup_uniq p.
 Let f_inj := inj_cycle f_p.
 Let homo_f := homo_cycle f_p.
 
-Lemma mem_orbit_cycle : {in p &, forall x, orbit x =i p}.
+Lemma in_orbit_cycle : {in p &, forall x, orbit x =i p}.
 Proof.
 by move=> x y xp yp; rewrite (orbitE fcycle_undup)// ?mem_rot ?mem_undup.
 Qed.
@@ -786,7 +786,7 @@ Lemma orbitPcycle {x} : [<->
   (* 5 *) {in orbit x &, injective f}].
 Proof.
 tfae=> [xorbit_cycle|||[k fkx]|fx|/injectivePcycle//].
-- by apply: eq_order_cycle xorbit_cycle _ _ _ _; rewrite ?in_orbit.
+- by apply: eq_order_cycle xorbit_cycle _ _ _ _; rewrite ?mem_orbit.
 - move=> /subset_cardP/(_ _)->; rewrite ?inE//; apply/subsetP=> y.
   by apply: connect_trans; apply: fconnect1.
 - by exists (findex (f x) x); rewrite // iterSr iter_findex.
@@ -830,7 +830,7 @@ End fconnect.
 
 End Orbit.
 
-Hint Resolve mem_orbit order_gt0 orbit_uniq : core.
+Hint Resolve in_orbit mem_orbit order_gt0 orbit_uniq : core.
 Prenex Implicits order orbit findex finv order_set.
 Arguments orbitPcycle {T f x}.
 
