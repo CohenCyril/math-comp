@@ -13,7 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added a `void` notation for the `Empty_set` type of the standard library, the
   canonical injection `of_void` and its cancellation lemma `of_voidK`, and
   `eq`, `choice`, `count` and `fin` instances.
-  
+
 - Added `ltn_ind` general induction principle for `nat` variables, helper lemmas `ubnP`, `ltnSE`, ubnPleq, ubnPgeq and ubnPeq, in support of a generalized induction idiom for `nat` measures that does not rely on the `{-2}` numerical occurrence selector, and purged this idiom from the `mathcomp` library (see below).
 
 - Added fixpoint and cofixpoint constructions to `finset`: `fixset`,
@@ -103,10 +103,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added theorems `nextE`, `mem_fcycle`, `inj_cycle`, `take_traject`
   and `trajectD` in `path.v`
 
-- Added lemmas about `cycle`, `fconnect`, `order` and `orbit` in
-  `fingraph.v`:
+- Added lemmas about `cycle`, `connect`, `fconnect`, `order` and
+  `orbit` in `fingraph.v`:
+  - lemma `connect_cycle`,
   - lemmas `in_orbit`, `order_gt0`, `findex_eq0`, `mem_orbit`,
-  `image_orbit`,
+    `image_orbit`,
   - lemmas `fcycle_rconsE`, `fcycle_consE`, `fcycle_consEflatten` and
     `undup_cycle_cons` which operate under the precondition that the
     sequence `x :: p` is a cycle for f (i.e. `fcycle f (x :: p)`).
@@ -116,7 +117,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `finv_inj_cycle`, `iter_finv_cycle`, `cycle_orbit_cycle`,
     `fpath_finv_cycle`, `fpath_finv_f_cycle`, `fpath_f_finv_cycle`,
     `prevE`, `fcycleEflatten`, `fcycle_undup`, `in_orbit_cycle`,
-    `fconnect2cycle`, `eq_order_cycle`, `iter_order_cycle`,
+    `eq_order_cycle`, `iter_order_cycle`,
   - lemmas `injectivePcycle`, `orbitPcycle`, `fconnect_eqVf`,
     `order_id_cycle`, `orderPcycle`, `fconnect_f`, `fconnect_findex`.
 
@@ -131,7 +132,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 that does not rely on the `{-2}` numerical occurrence selector, using
 new `ssrnat` helper lemmas `ltn_ind`, `ubnP`, `ubnPleq`,  ...., (see above). The new idiom is documented in `ssrnat`.
    This change anticipates an expected evolution of `fintype` to integrate `finmap`. It is likely that the new definition of the `#|A|` notation will hide multiple occurrences of `A`, which will break the `{-2}` induction idiom. Client libraries should update before the 1.11 release.
-   
+
 - `eqVneq` lemma is changed from `{x = y} + {x != y}` to
   `eq_xor_neq x y (y == x) (x == y)`, on which a case analysis performs
   simultaneous replacement of expressions of the form `x == y` and `y == x`

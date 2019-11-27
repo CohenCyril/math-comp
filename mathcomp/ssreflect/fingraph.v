@@ -166,6 +166,14 @@ move=> e_p y p_y; case/splitPl: p / p_y e_p => p q <-.
 by rewrite cat_path => /andP[e_p _]; apply/connectP; exists p.
 Qed.
 
+Lemma connect_cycle p : cycle e p -> {in p &, forall x y, connect x y}.
+Proof.
+move=> e_p x y /rot_to[i q rip]; rewrite -(mem_rot i) rip -mem_rcons => yqx.
+have {p i e_p rip} /= : cycle e (x :: q) by rewrite -rip rot_cycle.
+have /path.splitP[r s] := yqx; rewrite cat_path => /andP[xry _] {q yqx}.
+by apply/connectP; exists (rcons r y); rewrite ?last_rcons.
+Qed.
+
 Definition root x := odflt x (pick (connect x)).
 
 Definition roots : pred T := fun x => root x == x.
@@ -740,9 +748,6 @@ Lemma in_orbit_cycle : {in p &, forall x, orbit x =i p}.
 Proof.
 by move=> x y xp yp; rewrite (orbitE fcycle_undup)// ?mem_rot ?mem_undup.
 Qed.
-
-Lemma fconnect2cycle : {in p &, forall x y, fconnect f x y}.
-Proof. by move=> x y xp yp; rewrite !(fconnect_cycle f_p). Qed.
 
 Lemma eq_order_cycle : {in p &, forall x y, order y = order x}.
 Proof.
