@@ -106,7 +106,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added lemmas about `cycle`, `fconnect`, `order` and `orbit` in
   `fingraph.v`:
-  - lemmas `mem_orbit`, `order_gt0`, `findex_eq0`, `orbit_homo`,
+  - lemmas `mem_orbit`, `order_gt0`, `findex_eq0`, `in_orbit`,
   `image_orbit`,
   - lemmas `fcycle_rconsE`, `fcycle_consE`, `fcycle_consEiter_cat` and
     `undup_cycle_cons` which operate under the precondition that the

@@ -444,14 +444,14 @@ move=> eq_k_f x y /iter_findex <-; elim: {y}(findex x y) => //= n ->.
 by rewrite (eqP (eq_k_f _)).
 Qed.
 
-Lemma orbit_homo x : {homo f : y / y \in orbit x}.
+Lemma in_orbit x : {homo f : y / y \in orbit x}.
 Proof.
 by move=> y; rewrite -!fconnect_orbit => /connect_trans->//; apply: fconnect1.
 Qed.
 
 Lemma image_orbit x : {subset image f (orbit x) <= orbit x}.
 Proof.
-by move=> _ /mapP[y yin ->]; apply: orbit_homo; rewrite ?mem_enum in yin.
+by move=> _ /mapP[y yin ->]; apply: in_orbit; rewrite ?mem_enum in yin.
 Qed.
 
 Section orbit_in.
