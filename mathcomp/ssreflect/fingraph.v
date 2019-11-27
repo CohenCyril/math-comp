@@ -168,10 +168,10 @@ Qed.
 
 Lemma connect_cycle p : cycle e p -> {in p &, forall x y, connect x y}.
 Proof.
-move=> e_p x y /rot_to[i q rip]; rewrite -(mem_rot i) rip -mem_rcons => yqx.
-have {p i e_p rip} /= : cycle e (x :: q) by rewrite -rip rot_cycle.
-have /path.splitP[r s] := yqx; rewrite cat_path => /andP[xry _] {q yqx}.
-by apply/connectP; exists (rcons r y); rewrite ?last_rcons.
+move=> e_p x y /rot_to[i q rip]; rewrite -(mem_rot i) rip => yqx.
+have /= : cycle e (x :: q) by rewrite -rip rot_cycle.
+case/splitPl: yqx => r s lxr; rewrite rcons_cat cat_path => /andP[xr _].
+by apply/connectP; exists r.
 Qed.
 
 Definition root x := odflt x (pick (connect x)).

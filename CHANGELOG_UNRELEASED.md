@@ -61,8 +61,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
        `edivnS`, `divnS`, `modnS`, `edivn_pred`, `divn_pred` and
        `modn_pred`.
 
-- Added `mem2E` in `path.v`.
-
 - Added `sort_rec1` and `sortE` to help inductive reasoning on `sort`.
 
 - Added map/parametricity theorems about `path`, `sort`, and `sorted`:
@@ -100,8 +98,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added ssrfun theorem `inj_compr`.
 
-- Added theorems `nextE`, `mem_fcycle`, `inj_cycle`, `take_traject`
-  and `trajectD` in `path.v`
+- Added theorems `mem2E`, `nextE`, `mem_fcycle`, `inj_cycle`,
+  `take_traject`, `trajectD` and `cycle_catC` in `path.v`
 
 - Added lemmas about `cycle`, `connect`, `fconnect`, `order` and
   `orbit` in `fingraph.v`:

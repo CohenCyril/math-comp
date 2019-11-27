@@ -157,6 +157,10 @@ Qed.
 
 End Paths.
 
+Lemma cycle_catC (T : Type) (e : rel T) (p q : seq T) :
+  cycle e (p ++ q) = cycle e (q ++ p).
+Proof. by rewrite -rot_size_cat rot_cycle. Qed.
+
 Arguments pathP {T e x p}.
 
 Section HomoPath.
