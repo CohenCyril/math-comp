@@ -1285,29 +1285,17 @@ Qed.
 Lemma undup_nil s : undup s = [::] -> s = [::].
 Proof. by case: s => //= x s; rewrite -mem_undup; case: ifP; case: undup. Qed.
 
-Lemma undup_rcons s x :
-  undup (rcons s x) = rcons [seq y <- undup s | y != x] x.
-Proof.
-elim: s => [|/= y s ->]//; rewrite mem_rcons in_cons.
-have [->|neq_yx]//= := eqVneq; first by case: ifP; rewrite /= ?eqxx.
-by case: ifPn => //= yNs; rewrite neq_yx.
-Qed.
-
 Lemma undup_cat s t :
   undup (s ++ t) = [seq x <- undup s | x \notin t] ++ undup t.
 Proof.
-elim: t => [|/= x t IHt] in s *; first by rewrite !cats0 filter_predT.
-rewrite -cat_rcons IHt undup_rcons filter_rcons -filter_predI.
-have [/=xt|/=xNt] := boolP (x \in t); rewrite -?cat_rcons; congr cat.
-  by apply: eq_filter => y/=; rewrite inE negb_or andbC.
-by congr rcons; apply: eq_filter => y/=; rewrite inE negb_or andbC.
+elim: s => //= x s ->; rewrite mem_cat.
+by case: (x \in s) => //=; case: (x \in t).
 Qed.
 
-Lemma undup_iter_cat n (s : seq T) : 0 < n -> undup (iter n (cat s) [::]) = undup s.
+Lemma undup_rcons s x :
+  undup (rcons s x) = rcons [seq y <- undup s | y != x] x.
 Proof.
-case: n => [//|n _]; elim: n => [//=|n IHn]; first by rewrite cats0.
-rewrite iterS undup_cat IHn (@eq_in_filter _ pred0) ?filter_pred0// => x.
-by rewrite /= mem_undup mem_cat => ->.
+by rewrite -!cats1 undup_cat; congr cat; apply: eq_filter => y; rewrite inE.
 Qed.
 
 (* Lookup *)
@@ -2867,6 +2855,14 @@ Proof. by elim: ss => // s ss /= <-; apply: map_cat. Qed.
 Lemma flatten_map1 (S T : Type) (f : S -> T) s :
   flatten [seq [:: f x] | x <- s] = map f s.
 Proof. by elim: s => //= s0 s ->. Qed.
+
+Lemma undup_flatten_nseq n (T : eqType) (s : seq T) : 0 < n ->
+  undup (flatten (nseq n s)) = undup s.
+Proof.
+elim: n => [|[|n]/= IHn]//= _; rewrite ?cats0// undup_cat {}IHn//.
+rewrite (@eq_in_filter _ _ pred0) ?filter_pred0// => x.
+by rewrite mem_undup mem_cat => ->.
+Qed.
 
 Lemma sumn_flatten (ss : seq (seq nat)) :
   sumn (flatten ss) = sumn (map sumn ss).

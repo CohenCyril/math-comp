@@ -606,7 +606,6 @@ Proof. by apply: same_connect1r x => /=. Qed.
 End orbit_inj.
 Hint Resolve orbit_uniq : core.
 
-Section orbit_cycle.
 Section fcycle_p.
 Variables (p : seq T) (f_p : fcycle f p).
 
@@ -662,11 +661,11 @@ Lemma iter_finv_cycle n :
   {in p, forall x, n <= order x -> iter n finv x = iter (order x - n) f x}.
 Proof. exact: iter_finv_in. Qed.
 
-Lemma cycle_orbit_cycle : {in p, forall x, (fcycle f) (orbit x)}.
+Lemma cycle_orbit_cycle : {in p, forall x, fcycle f (orbit x)}.
 Proof. exact: cycle_orbit_in. Qed.
 
 Lemma fpath_finv_cycle q x : (x \in p) && (fpath finv x q) =
-  (last x q \in p) && (fpath f (last x q) (rev (belast x q))).
+  (last x q \in p) && fpath f (last x q) (rev (belast x q)).
 Proof. exact: fpath_finv_in. Qed.
 
 Lemma fpath_finv_f_cycle q : {in p, forall x,
@@ -694,7 +693,7 @@ Proof. by rewrite rcons_cons; have /fpathE-> := f_p; rewrite size_rcons. Qed.
 Lemma fcycle_consE : x :: p = traject f x (size p).+1.
 Proof. by have := fcycle_rconsE; rewrite trajectSr => /rcons_inj[/= <-]. Qed.
 
-Lemma fcycle_consEiter_cat : exists k, x :: p = iter k.+1 (cat (orbit x)) [::].
+Lemma fcycle_consEflatten : exists k, x :: p = flatten (nseq k.+1 (orbit x)).
 Proof.
 move: f_p; rewrite fcycle_consE; elim/ltn_ind: (size p) => n IHn t_cycle.
 have := order_le_cycle t_cycle (mem_head _ _); rewrite size_traject.
@@ -711,7 +710,7 @@ Qed.
 
 Lemma undup_cycle_cons : undup (x :: p) = orbit x.
 Proof.
-by have [n {1}->] := fcycle_consEiter_cat; rewrite undup_iter_cat ?undup_id.
+by have [n {1}->] := fcycle_consEflatten; rewrite undup_flatten_nseq ?undup_id.
 Qed.
 
 End fcycle_cons.
@@ -720,10 +719,10 @@ Section fcycle_undup.
 
 Variable (p : seq T) (f_p : fcycle f p).
 
-Lemma fcycleEiter_cat : exists k, p = iter k (cat (undup p)) [::].
+Lemma fcycleEflatten : exists k, p = flatten (nseq k (undup p)).
 Proof.
 case: p f_p => [//|x q] f_q; first by exists 0.
-have [k {1}->] := @fcycle_consEiter_cat x q f_q.
+have [k {1}->] := @fcycle_consEflatten x q f_q.
 by exists k.+1; rewrite undup_cycle_cons.
 Qed.
 
@@ -756,8 +755,6 @@ by move=> x y xp yp; rewrite (eq_order_cycle yp) ?(iter_order_in homo_f f_inj).
 Qed.
 
 End fcycle_undup.
-
-End orbit_cycle.
 
 Section fconnect.
 

@@ -31,7 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `all_filter`, `all_pmap`, and `all_allpairsP` in `seq.v`.
 
 - Added theorems `nth_rcons_default`, `undup_rcons`, `undup_cat` and
-  `undup_iter_cat` in `seq.v`
+  `undup_flatten_nseq` in `seq.v`
 
 - Fintype theorems: `fintype0`, `card_le1P`, `mem_card1`,
   `card1P`, `fintype_le1P`, `fintype1`, `fintype1P`,
@@ -70,9 +70,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `homo_sorted`, `mono_sorted`, `map_merge`, `merge_map`, `map_sort`,
   `sort_map`, `sorted_map`, `homo_sorted_in`, `mono_sorted_in`.
 
-- Added theorems `take_traject` and `trajectD` in `path.v`
-
-- Extracting lemma `pathE` from `pathP`, and shortening the proof of
+- Extracting lemma `fpathE` from `fpathP`, and shortening the proof of
   the latter.
 
 - Added the theorem `perm_iota_sort` to express that the sorting of
@@ -102,13 +100,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added ssrfun theorem `inj_compr`.
 
-- Added lemmas `nextE`, `mem_fcycle` and `inj_cycle` in `path.v`
+- Added theorems `nextE`, `mem_fcycle`, `inj_cycle`, `take_traject`
+  and `trajectD` in `path.v`
 
 - Added lemmas about `cycle`, `fconnect`, `order` and `orbit` in
   `fingraph.v`:
   - lemmas `in_orbit`, `order_gt0`, `findex_eq0`, `mem_orbit`,
   `image_orbit`,
-  - lemmas `fcycle_rconsE`, `fcycle_consE`, `fcycle_consEiter_cat` and
+  - lemmas `fcycle_rconsE`, `fcycle_consE`, `fcycle_consEflatten` and
     `undup_cycle_cons` which operate under the precondition that the
     sequence `x :: p` is a cycle for f (i.e. `fcycle f (x :: p)`).
   - lemmas which operate under the precondition there is a sequence
@@ -116,7 +115,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `order_le_cycle`, `finv_cycle`, `f_finv_cycle`, `finv_f_cycle`,
     `finv_inj_cycle`, `iter_finv_cycle`, `cycle_orbit_cycle`,
     `fpath_finv_cycle`, `fpath_finv_f_cycle`, `fpath_f_finv_cycle`,
-    `prevE`, `fcycleEiter_cat`, `fcycle_undup`, `in_orbit_cycle`,
+    `prevE`, `fcycleEflatten`, `fcycle_undup`, `in_orbit_cycle`,
     `fconnect2cycle`, `eq_order_cycle`, `iter_order_cycle`,
   - lemmas `injectivePcycle`, `orbitPcycle`, `fconnect_eqVf`,
     `order_id_cycle`, `orderPcycle`, `fconnect_f`, `fconnect_findex`.

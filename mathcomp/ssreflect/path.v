@@ -1012,10 +1012,7 @@ Qed.
 
 Lemma trajectD m n x :
   traject x (m + n) = traject x m ++ traject (iter m f x) n.
-Proof.
-elim: m => // m IHm in n *; rewrite addSnnS IHm.
-by rewrite [in LHS]trajectS [in RHS]trajectSr cat_rcons.
-Qed.
+Proof. by elim: m => //m IHm in x *; rewrite addSn !trajectS IHm -iterSr. Qed.
 
 Lemma take_traject n k x : k <= n -> take k (traject x n) = traject x k.
 Proof. by move=> /subnKC<-; rewrite trajectD take_size_cat ?size_traject. Qed.
