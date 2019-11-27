@@ -118,8 +118,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `fpath_finv_cycle`, `fpath_finv_f_cycle`, `fpath_f_finv_cycle`,
     `prevE`, `fcycleEiter_cat`, `fcycle_undup`, `mem_orbit_cycle`,
     `fconnect2cycle`, `eq_order_cycle`, `iter_order_cycle`,
-  - lemmas `orbitPcycle`, `fconnect_eqVf`, `order_id_cycle`,
-    `orderPcycle`, `fconnect_f`, `fconnect_findex`.
+  - lemmas `injectivePcycle`, `orbitPcycle`, `fconnect_eqVf`,
+    `order_id_cycle`, `orderPcycle`, `fconnect_f`, `fconnect_findex`.
 
 - Added lemma `rot_index` which explicits the index given by `rot_to`.
 

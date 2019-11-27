@@ -526,6 +526,13 @@ Proof. by move=> lS /(conj lS)/andP; rewrite -fpath_finv_in => /andP[]. Qed.
 
 End orbit_in.
 
+Lemma injectivePcycle x :
+  reflect {in orbit x &, injective f} (fcycle f (orbit x)).
+Proof.
+apply: (iffP idP) => [/inj_cycle//|/cycle_orbit_in].
+by apply; [apply: in_orbit|apply: mem_orbit].
+Qed.
+
 Section orbit_inj.
 
 Hypothesis injf : injective f.
@@ -754,6 +761,13 @@ End orbit_cycle.
 
 Section fconnect.
 
+Lemma fconnect_eqVf x y : fconnect f x y = (x == y) || fconnect f (f x) y.
+Proof.
+apply/idP/idP => [/iter_findex <-|/predU1P [<-|] //]; last first.
+  exact/connect_trans/fconnect1.
+by case: findex => [|i]; rewrite ?eqxx// iterSr fconnect_iter orbT.
+Qed.
+
 (*****************************************************************************)
 (* Lemma orbitPcycle is of type "The Following Are Equivalent", which means  *)
 (* all four statements are equivalent to each other. In order to use it, one *)
@@ -765,34 +779,26 @@ Section fconnect.
 (*****************************************************************************)
 Lemma orbitPcycle {x} : [<->
   (* 0 *) fcycle f (orbit x);
-  (* 1 *) fconnect f (f x) x;
-  (* 2 *) exists k, iter k.+1 f x = x;
-  (* 3 *) iter (order x) f x = x].
+  (* 1 *) order (f x) = order x;
+  (* 2 *) x \in fconnect f (f x);
+  (* 3 *) exists k, iter k.+1 f x = x;
+  (* 4 *) iter (order x) f x = x;
+  (* 5 *) {in orbit x &, injective f}].
 Proof.
-tfae=> [xorbit_cycle|f_fix|[k]|fix_x].
-- by rewrite (@fconnect_cycle (orbit x))// homo_cycle.
+tfae=> [xorbit_cycle|||[k fkx]|fx|/injectivePcycle//].
+- by apply: eq_order_cycle xorbit_cycle _ _ _ _; rewrite ?in_orbit.
+- move=> /subset_cardP/(_ _)->; rewrite ?inE//; apply/subsetP=> y.
+  by apply: connect_trans; apply: fconnect1.
 - by exists (findex (f x) x); rewrite // iterSr iter_findex.
-- wlog : k / k < order x => [hwlog|].
-    by have /loopingP /(_ k) /trajectP[i ?/=->/hwlog->] := looping_order x.
-  rewrite leq_eqVlt => /predU1P[->//|k_le fk].
-  have /(uniqPn x)[] := orbit_uniq x.
-  by exists 0, k.+1; rewrite size_traject !nth_traject.
-- rewrite /orbit (cycle_path x) -orderSpred {1}trajectSr last_rcons /=.
-  by rewrite -iterS orderSpred fix_x eqxx fpath_traject.
-Qed.
-
-Lemma fconnect_eqVf x y : fconnect f x y = (x == y) || fconnect f (f x) y.
-Proof.
-apply/idP/idP => [/iter_findex <-|/predU1P [<-|] //]; last first.
-  exact/connect_trans/fconnect1.
-by case: findex => [|i]; rewrite ?eqxx// iterSr fconnect_iter orbT.
+- apply: (@iter_order_cycle (traject f x k.+1)); rewrite /= ?mem_head//.
+  by apply/fpathP; exists k.+1; rewrite trajectSr -iterSr fkx.
+- move=> y z; rewrite -!fconnect_orbit.
+  do![move=> /iter_findex <-] => /(congr1 (iter (order x).-1 f)).
+  by rewrite -!iterSr -!iter_add !orderSpred ![order _ + _]addnC !iter_add fx.
 Qed.
 
 Lemma order_id_cycle x : fcycle f (orbit x) -> order (f x) = order x.
-Proof.
-move=> /(orbitPcycle 0 1)/= fx_x; apply: eq_card => y; rewrite !inE.
-by apply/idP/idP; apply/connect_trans => //; apply/fconnect1.
-Qed.
+Proof. by move/(orbitPcycle 0 1). Qed.
 
 Inductive order_spec_cycle x : bool -> Type :=
 | OrderStepCycle of fcycle f (orbit x) & order x = order (f x) :
@@ -805,12 +811,12 @@ Proof.
 have [xcycle|Ncycle] := boolP (fcycle f (orbit x)); constructor => //.
   by rewrite order_id_cycle.
 rewrite /order (eq_card (_ : _ =1 [predU1 x & fconnect f (f x)])).
-  by rewrite cardU1 inE (contraNN (all_iffLR orbitPcycle 1 0)).
+  by rewrite cardU1 inE (contraNN (all_iffLR orbitPcycle 2 0)).
 by move=> y; rewrite !inE fconnect_eqVf eq_sym.
 Qed.
 
 Lemma fconnect_f x : fconnect f (f x) x = fcycle f (orbit x).
-Proof. by apply/idP/idP => /(orbitPcycle 0 1). Qed.
+Proof. by apply/idP/idP => /(orbitPcycle 0 2). Qed.
 
 Lemma fconnect_findex x y :
   fconnect f x y -> y != x -> findex x y = (findex (f x) y).+1.
