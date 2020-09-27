@@ -417,7 +417,7 @@ Reserved Notation ">= y :> T" (at level 35, y at next level).
 Reserved Notation "< y :> T" (at level 35, y at next level).
 Reserved Notation "> y :> T" (at level 35, y at next level).
 Reserved Notation "x >=< y" (at level 70, no associativity).
-Reserved Notation ">=< x" (at level 35).
+Reserved Notation ">=< y" (at level 35).
 Reserved Notation ">=< y :> T" (at level 35, y at next level).
 Reserved Notation "x >< y" (at level 70, no associativity).
 Reserved Notation ">< x" (at level 35).
@@ -447,7 +447,7 @@ Reserved Notation ">=^d y :> T" (at level 35, y at next level).
 Reserved Notation "<^d y :> T" (at level 35, y at next level).
 Reserved Notation ">^d y :> T" (at level 35, y at next level).
 Reserved Notation "x >=<^d y" (at level 70, no associativity).
-Reserved Notation ">=<^d x" (at level 35).
+Reserved Notation ">=<^d y" (at level 35).
 Reserved Notation ">=<^d y :> T" (at level 35, y at next level).
 Reserved Notation "x ><^d y" (at level 70, no associativity).
 Reserved Notation "><^d x" (at level 35).
@@ -1132,9 +1132,6 @@ Notation "< y :> T" := (< (y : T)) (only parsing) : order_scope.
 Notation "> y" := (lt y) : order_scope.
 Notation "> y :> T" := (> (y : T)) (only parsing) : order_scope.
 
-Notation ">=< y" := ([pred x | comparable x y]) : order_scope.
-Notation ">=< y :> T" := (>=< (y : T)) (only parsing) : order_scope.
-
 Notation "x <= y" := (le x y) : order_scope.
 Notation "x <= y :> T" := ((x : T) <= (y : T)) (only parsing) : order_scope.
 Notation "x >= y" := (y <= x) (only parsing) : order_scope.
@@ -1154,12 +1151,12 @@ Notation "x <= y ?= 'iff' C" := (leif x y C) : order_scope.
 Notation "x <= y ?= 'iff' C :> T" := ((x : T) <= (y : T) ?= iff C)
   (only parsing) : order_scope.
 
-Notation ">=< x" := ([pred y | comparable y x]) : order_scope.
-Notation ">=< x :> T" := (>=< (x : T)) (only parsing) : order_scope.
+Notation ">=< y" := [pred x | comparable x y] : order_scope.
+Notation ">=< y :> T" := (>=< (y : T)) (only parsing) : order_scope.
 Notation "x >=< y" := (comparable x y) : order_scope.
 
-Notation ">< x" := (fun y => ~~ (comparable x y)) : order_scope.
-Notation ">< x :> T" := (>< (x : T)) (only parsing) : order_scope.
+Notation ">< y" := [pred x | ~~ comparable x y] : order_scope.
+Notation ">< y :> T" := (>< (y : T)) (only parsing) : order_scope.
 Notation "x >< y" := (~~ (comparable x y)) : order_scope.
 
 Notation "[ 'arg' 'min_' ( i < i0 | P ) F ]" :=
@@ -2521,9 +2518,6 @@ Notation "<^d y :> T" := (<^d (y : T)) (only parsing) : order_scope.
 Notation ">^d y" := (<^d%O y) : order_scope.
 Notation ">^d y :> T" := (>^d (y : T)) (only parsing) : order_scope.
 
-Notation ">=<^d y" := (>=<^d%O y) : order_scope.
-Notation ">=<^d y :> T" := (>=<^d (y : T)) (only parsing) : order_scope.
-
 Notation "x <=^d y" := (<=^d%O x y) : order_scope.
 Notation "x <=^d y :> T" := ((x : T) <=^d (y : T)) (only parsing) : order_scope.
 Notation "x >=^d y" := (y <=^d x) (only parsing) : order_scope.
@@ -2543,12 +2537,12 @@ Notation "x <=^d y ?= 'iff' C" := (<?=^d%O x y C) : order_scope.
 Notation "x <=^d y ?= 'iff' C :> T" := ((x : T) <=^d (y : T) ?= iff C)
   (only parsing) : order_scope.
 
-Notation ">=<^d x" := (>=<^d%O x) : order_scope.
-Notation ">=<^d x :> T" := (>=<^d (x : T)) (only parsing) : order_scope.
+Notation ">=<^d y" := [pred x | dual_comparable x y] : order_scope.
+Notation ">=<^d y :> T" := (>=<^d (y : T)) (only parsing) : order_scope.
 Notation "x >=<^d y" := (>=<^d%O x y) : order_scope.
 
-Notation "><^d x" := (fun y => ~~ (>=<^d%O x y)) : order_scope.
-Notation "><^d x :> T" := (><^d (x : T)) (only parsing) : order_scope.
+Notation "><^d y" := [pred x | ~~ dual_comparable x y] : order_scope.
+Notation "><^d y :> T" := (><^d (y : T)) (only parsing) : order_scope.
 Notation "x ><^d y" := (~~ (><^d%O x y)) : order_scope.
 
 Notation "x `&^d` y" := (dual_meet x y) : order_scope.
@@ -5686,9 +5680,6 @@ Notation "<^p y :> T" := (<^p (y : T)) (only parsing) : order_scope.
 Notation ">^p y" := (<^p%O y) : order_scope.
 Notation ">^p y :> T" := (>^p (y : T)) (only parsing) : order_scope.
 
-Notation ">=<^p y" := (>=<^p%O y) : order_scope.
-Notation ">=<^p y :> T" := (>=<^p (y : T)) (only parsing) : order_scope.
-
 Notation "x <=^p y" := (<=^p%O x y) : order_scope.
 Notation "x <=^p y :> T" := ((x : T) <=^p (y : T)) (only parsing) : order_scope.
 Notation "x >=^p y" := (y <=^p x) (only parsing) : order_scope.
@@ -5708,12 +5699,12 @@ Notation "x <=^p y ?= 'iff' C" := (<?=^p%O x y C) : order_scope.
 Notation "x <=^p y ?= 'iff' C :> T" := ((x : T) <=^p (y : T) ?= iff C)
   (only parsing) : order_scope.
 
-Notation ">=<^p x" := (>=<^p%O x) : order_scope.
-Notation ">=<^p x :> T" := (>=<^p (x : T)) (only parsing) : order_scope.
+Notation ">=<^p y" := [pred x | >=<^p%O x y] : order_scope.
+Notation ">=<^p y :> T" := (>=<^p (y : T)) (only parsing) : order_scope.
 Notation "x >=<^p y" := (>=<^p%O x y) : order_scope.
 
-Notation "><^p x" := (fun y => ~~ (>=<^p%O x y)) : order_scope.
-Notation "><^p x :> T" := (><^p (x : T)) (only parsing) : order_scope.
+Notation "><^p y" := [pred x | ~~ (>=<^p%O x y)] : order_scope.
+Notation "><^p y :> T" := (><^p (y : T)) (only parsing) : order_scope.
 Notation "x ><^p y" := (~~ (><^p%O x y)) : order_scope.
 
 Notation "x `&^p` y" :=  (@meet prod_display _ x y) : order_scope.
@@ -5799,9 +5790,6 @@ Notation "<^l y :> T" := (<^l (y : T)) (only parsing) : order_scope.
 Notation ">^l y" := (<^l%O y) : order_scope.
 Notation ">^l y :> T" := (>^l (y : T)) (only parsing) : order_scope.
 
-Notation ">=<^l y" := (>=<^l%O y) : order_scope.
-Notation ">=<^l y :> T" := (>=<^l (y : T)) (only parsing) : order_scope.
-
 Notation "x <=^l y" := (<=^l%O x y) : order_scope.
 Notation "x <=^l y :> T" := ((x : T) <=^l (y : T)) (only parsing) : order_scope.
 Notation "x >=^l y" := (y <=^l x) (only parsing) : order_scope.
@@ -5821,12 +5809,12 @@ Notation "x <=^l y ?= 'iff' C" := (<?=^l%O x y C) : order_scope.
 Notation "x <=^l y ?= 'iff' C :> T" := ((x : T) <=^l (y : T) ?= iff C)
   (only parsing) : order_scope.
 
-Notation ">=<^l x" := (>=<^l%O x) : order_scope.
-Notation ">=<^l x :> T" := (>=<^l (x : T)) (only parsing) : order_scope.
+Notation ">=<^l y" := [pred x | >=<^l%O x y] : order_scope.
+Notation ">=<^l y :> T" := (>=<^l (y : T)) (only parsing) : order_scope.
 Notation "x >=<^l y" := (>=<^l%O x y) : order_scope.
 
-Notation "><^l x" := (fun y => ~~ (>=<^l%O x y)) : order_scope.
-Notation "><^l x :> T" := (><^l (x : T)) (only parsing) : order_scope.
+Notation "><^l y" := [pred x | ~~ (>=<^l%O x y)] : order_scope.
+Notation "><^l y :> T" := (><^l (y : T)) (only parsing) : order_scope.
 Notation "x ><^l y" := (~~ (><^l%O x y)) : order_scope.
 
 Notation meetlexi := (@meet lexi_display _).
