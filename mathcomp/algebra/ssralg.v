@@ -1441,7 +1441,7 @@ Section RightRegular.
 Variable R : ringType.
 Implicit Types x y : R.
 (* BUG: [ringType of R] fails with coqc but succeeds with coqtop *)
-Let Rc := [the ringType of R^c].
+Let Rc := [ringType of R^c].
 
 Lemma mulIr_eq0 x y : rreg x -> (y * x == 0) = (y == 0).
 Proof. exact: (@mulrI_eq0 Rc). Qed.
