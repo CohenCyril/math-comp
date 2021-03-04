@@ -847,6 +847,11 @@ Lemma big_cons i r (P : pred I) F :
   \big[op/idx]_(j <- i :: r | P j) F j = if P i then op (F i) x else x.
 Proof. by rewrite unlock. Qed.
 
+Lemma big_rcons_idx i r (P : pred I) F
+    (idx' := if P i then op (F i) idx else idx) :
+  \big[op/idx]_(j <- rcons r i | P j) F j = \big[op/idx']_(j <- r | P j) F j.
+Proof. by elim: r => /= [|j r]; rewrite ?unlock//= => ->. Qed.
+
 Lemma big_map J (h : J -> I) r (P : pred I) F :
   \big[op/idx]_(i <- map h r | P i) F i
      = \big[op/idx]_(j <- r | P (h j)) F (h j).
@@ -1330,6 +1335,18 @@ Lemma big_flatten I rr (P : pred I) F :
 Proof.
 by elim: rr => [|r rr IHrr]; rewrite ?big_nil //= big_cat big_cons -IHrr.
 Qed.
+
+Lemma big_change_idx I x r (P : pred I) F :
+  op (\big[op/idx]_(j <- r | P j) F j) x = \big[op/x]_(j <- r | P j) F j.
+Proof.
+elim: r => [|i r]; rewrite ?(big_nil, big_cons, Monoid.mul1m)// => <-.
+by case: ifP => // Pi; rewrite Monoid.mulmA.
+Qed.
+
+Lemma big_rcons I i r (P : pred I) F :
+  \big[op/idx]_(j <- rcons r i | P j) F j =
+  op (\big[op/idx]_(j <- r | P j) F j) (if P i then F i else 1).
+Proof. by rewrite big_rcons_idx -big_change_idx mulm1. Qed.
 
 End Plain.
 

@@ -10,7 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- in `bigop.v`, added lemma `sumnB`.
+- in `bigop.v`, added lemmas `sumnB`, `big_rcons`, `big_rcons_idx`,
+  and `big_change_idx`.
 
 - in `seq.v`,
   + new higher-order predicate `pairwise r xs` which asserts that the relation
