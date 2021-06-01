@@ -1011,12 +1011,12 @@ Module Order.
 (**************)
 
 HB.mixin Record IsPOrdered (d : unit) T of HasDecEq T := {
-  le       : rel T;
-  lt       : rel T;
-  lt_def   : forall x y, lt x y = (y != x) && (le x y);
-  le_refl  : reflexive     le;
-  le_anti  : antisymmetric le;
-  le_trans : transitive    le;
+  le_subdef       : rel T;
+  lt_subdef       : rel T;
+  lt_def_subdef   : forall x y, lt_subdef x y = (y != x) && (le_subdef x y);
+  le_refl_subdef  : reflexive     le_subdef;
+  le_anti_subdef  : antisymmetric le_subdef;
+  le_trans_subdef : transitive    le_subdef;
 }.
 
 (* FIXME *)
@@ -1030,6 +1030,259 @@ HB.structure Definition POrder (d : unit) :=
 (* FIXME *)
 HB.instance Definition _ (d : unit) (T : choiceType)
   (x : IsPOrdered d (@eta Type T)) : IsPOrdered d x := x.
+
+Notation le_print_with d := (@IsPOrdered.le_subdef d _ _ _).
+Notation le_print := (le_print_with _).
+Notation le := (IsPOrdered.le_subdef (POrder.on _)).
+Notation "<=%O" := le (only parsing) : fun_scope.
+Notation "<=%O" := le_print (only printing) : fun_scope.
+
+Notation lt_print := (IsPOrdered.lt_subdef _).
+Notation lt := (IsPOrdered.lt_subdef (POrder.on _)).
+Notation "<%O" := lt (only parsing) : fun_scope.
+Notation "<%O" := lt_print (only printing) : fun_scope.
+
+Section mixindefs.
+HB.declare Context (d : unit) (T : Type) of HasDecEq T & IsPOrdered d T.
+Variable (m : IsPOrdered d T).
+Definition ge_subdef : simpl_rel T := [rel x y | IsPOrdered.le_subdef m y x].
+End mixindefs.
+
+Notation ge_print_with d := (@ge_subdef d _ _ _).
+Notation ge_print := (ge_print_with _).
+Notation ge := (ge_subdef (POrder.on _)).
+Notation ">=%O" := ge (only parsing) : fun_scope.
+Notation ">=%O" := ge_print (only printing) : fun_scope.
+
+(* Section POrderDef. *)
+
+(* Variable (disp : unit) (T : porderType disp). *)
+
+(* Local Notation "x <= y" := (le x y) (only parsing) : order_scope. *)
+(* Local Notation "x <= y" := (le_print x y) (only printing) : order_scope. *)
+(* Local Notation "x < y" := (lt x y) (only parsing) : order_scope. *)
+(* Local Notation "x < y" := (lt_print x y) (only printing) : order_scope. *)
+
+(* Definition comparable : rel T := fun (x y : T) => (x <= y) || (y <= x). *)
+(* Local Notation "x >=< y" := (comparable x y) : order_scope. *)
+(* Local Notation "x >< y" := (~~ (x >=< y)) : order_scope. *)
+
+(* Definition ge : simpl_rel T := [rel x y | y <= x]. *)
+(* Definition gt : simpl_rel T := [rel x y | y < x]. *)
+(* Definition leif (x y : T) C : Prop := ((x <= y) * ((x == y) = C))%type. *)
+
+(* Definition le_of_leif x y C (le_xy : @leif x y C) := le_xy.1 : le x y. *)
+
+(* Definition lteif (x y : T) C := if C then x <= y else x < y. *)
+
+(* Variant le_xor_gt (x y : T) : *)
+(*   T -> T -> T -> T -> bool -> bool -> Set := *)
+(*   | LeNotGt of x <= y : le_xor_gt x y x x y y true false *)
+(*   | GtNotLe of y < x  : le_xor_gt x y y y x x false true. *)
+
+(* Variant lt_xor_ge (x y : T) : *)
+(*   T -> T -> T -> T -> bool -> bool -> Set := *)
+(*   | LtNotGe of x < y  : lt_xor_ge x y x x y y false true *)
+(*   | GeNotLt of y <= x : lt_xor_ge x y y y x x true false. *)
+
+(* Definition min (x y : T) := if x < y then x else y. *)
+(* Definition max (x y : T) := if x < y then y else x. *)
+
+(* Variant compare (x y : T) : *)
+(*    T -> T -> T -> T -> *)
+(*    bool -> bool -> bool -> bool -> bool -> bool -> Set := *)
+(*   | CompareLt of x < y : compare x y *)
+(*     x x y y false false false true false true *)
+(*   | CompareGt of y < x : compare x y *)
+(*     y y x x false false true false true false *)
+(*   | CompareEq of x = y : compare x y *)
+(*     x x x x true true true true false false. *)
+
+(* Variant incompare (x y : T) : *)
+(*    T -> T -> T -> T -> *)
+(*   bool -> bool -> bool -> bool -> bool -> bool -> bool -> bool -> Set := *)
+(*   | InCompareLt of x < y : incompare x y *)
+(*     x x y y false false false true false true true true *)
+(*   | InCompareGt of y < x : incompare x y *)
+(*     y y x x false false true false true false true true *)
+(*   | InCompare of x >< y  : incompare x y *)
+(*     x y y x false false false false false false false false *)
+(*   | InCompareEq of x = y : incompare x y *)
+(*     x x x x true true true true false false true true. *)
+
+(* Definition arg_min {I : finType} := @extremum T I le. *)
+(* Definition arg_max {I : finType}  := @extremum T I ge. *)
+
+(* End POrderDef. *)
+
+(* Prenex Implicits lt le leif lteif. *)
+(* Arguments ge {_ _}. *)
+(* Arguments gt {_ _}. *)
+(* Arguments min {_ _}. *)
+(* Arguments max {_ _}. *)
+(* Arguments comparable {_ _}. *)
+
+Module Import POSyntax.
+
+Notation "<=%O" := le : fun_scope.
+Notation "<=%O" := le_print : fun_scope.
+Notation ">=%O" := ge : fun_scope.
+Notation "<%O" := lt_print : fun_scope.
+Notation ">=%O" := ge_print : fun_scope.
+(* Notation ">%O" := gt : fun_scope. *)
+(* Notation "<?=%O" := leif : fun_scope. *)
+(* Notation "<?<=%O" := lteif : fun_scope. *)
+(* Notation ">=<%O" := comparable : fun_scope. *)
+(* Notation "><%O" := (fun x y => ~~ (comparable x y)) : fun_scope. *)
+
+Notation "<= y" := (ge y) : order_scope.
+Notation "<= y :> T" := (<= (y : T)) (only parsing) : order_scope.
+Notation ">= y"  := (le y) : order_scope.
+Notation ">= y :> T" := (>= (y : T)) (only parsing) : order_scope.
+Notation ">= y"  := (le_print y) (only printing) : order_scope.
+
+(* Notation "< y" := (gt y) : order_scope. *)
+(* Notation "< y :> T" := (< (y : T)) (only parsing) : order_scope. *)
+Notation "> y" := (lt y) : order_scope.
+Notation "> y :> T" := (> (y : T)) (only parsing) : order_scope.
+Notation "> y" := (lt_print y) (only printing) : order_scope.
+
+Notation "x <= y" := (le x y) (only parsing) : order_scope.
+Notation "x <= y :> T" := ((x : T) <= (y : T)) (only parsing) : order_scope.
+Notation "x >= y" := (y <= x) (only parsing) : order_scope.
+Notation "x >= y :> T" := ((x : T) >= (y : T)) (only parsing) : order_scope.
+Notation "x <= y" := (le_print x y) (only printing) : order_scope.
+
+Notation "x < y"  := (lt x y) (only parsing) : order_scope.
+Notation "x < y :> T" := ((x : T) < (y : T)) (only parsing) : order_scope.
+Notation "x > y"  := (y < x) (only parsing) : order_scope.
+Notation "x > y :> T" := ((x : T) > (y : T)) (only parsing) : order_scope.
+Notation "x < y"  := (lt_print x y) (only printing) : order_scope.
+
+Notation "x <= y <= z" := ((x <= y) && (y <= z)) : order_scope.
+Notation "x < y <= z" := ((x < y) && (y <= z)) : order_scope.
+Notation "x <= y < z" := ((x <= y) && (y < z)) : order_scope.
+Notation "x < y < z" := ((x < y) && (y < z)) : order_scope.
+
+Notation "x <= y <= z" := ((le_print x y) && (le_print y z)) (only printing) : order_scope.
+Notation "x < y <= z" := ((lt_print x y) && (le_print y z)) (only printing) : order_scope.
+Notation "x <= y < z" := ((le_print x y) && (lt_print y z)) (only printing) : order_scope.
+Notation "x < y < z" := ((lt_print x y) && (lt_print y z)) (only printing) : order_scope.
+
+(* Notation "x <= y ?= 'iff' C" := (leif x y C) : order_scope. *)
+(* Notation "x <= y ?= 'iff' C :> T" := ((x : T) <= (y : T) ?= iff C) *)
+(*   (only parsing) : order_scope. *)
+
+(* Notation "x < y ?<= 'if' C" := (lteif x y C) : order_scope. *)
+(* Notation "x < y ?<= 'if' C :> T" := ((x : T) < (y : T) ?<= if C) *)
+(*   (only parsing) : order_scope. *)
+
+(* Notation ">=< y" := [pred x | comparable x y] : order_scope. *)
+(* Notation ">=< y :> T" := (>=< (y : T)) (only parsing) : order_scope. *)
+(* Notation "x >=< y" := (comparable x y) : order_scope. *)
+
+(* Notation ">< y" := [pred x | ~~ comparable x y] : order_scope. *)
+(* Notation ">< y :> T" := (>< (y : T)) (only parsing) : order_scope. *)
+(* Notation "x >< y" := (~~ (comparable x y)) : order_scope. *)
+
+(* Notation "[ 'arg' 'min_' ( i < i0 | P ) F ]" := *)
+(*     (arg_min i0 (fun i => P%B) (fun i => F)) *)
+(*   (at level 0, i, i0 at level 10, *)
+(*    format "[ 'arg'  'min_' ( i  <  i0  |  P )  F ]") : order_scope. *)
+
+(* Notation "[ 'arg' 'min_' ( i < i0 'in' A ) F ]" := *)
+(*     [arg min_(i < i0 | i \in A) F] *)
+(*   (at level 0, i, i0 at level 10, *)
+(*    format "[ 'arg'  'min_' ( i  <  i0  'in'  A )  F ]") : order_scope. *)
+
+(* Notation "[ 'arg' 'min_' ( i < i0 ) F ]" := [arg min_(i < i0 | true) F] *)
+(*   (at level 0, i, i0 at level 10, *)
+(*    format "[ 'arg'  'min_' ( i  <  i0 )  F ]") : order_scope. *)
+
+(* Notation "[ 'arg' 'max_' ( i > i0 | P ) F ]" := *)
+(*      (arg_max i0 (fun i => P%B) (fun i => F)) *)
+(*   (at level 0, i, i0 at level 10, *)
+(*    format "[ 'arg'  'max_' ( i  >  i0  |  P )  F ]") : order_scope. *)
+
+(* Notation "[ 'arg' 'max_' ( i > i0 'in' A ) F ]" := *)
+(*     [arg max_(i > i0 | i \in A) F] *)
+(*   (at level 0, i, i0 at level 10, *)
+(*    format "[ 'arg'  'max_' ( i  >  i0  'in'  A )  F ]") : order_scope. *)
+
+(* Notation "[ 'arg' 'max_' ( i > i0 ) F ]" := [arg max_(i > i0 | true) F] *)
+(*   (at level 0, i, i0 at level 10, *)
+(*    format "[ 'arg'  'max_' ( i  >  i0 ) F ]") : order_scope. *)
+
+End POSyntax.
+HB.export POSyntax.
+
+(* Module POCoercions. *)
+(* Coercion le_of_leif : leif >-> is_true. *)
+(* End POCoercions. *)
+(* HB.export POCoercions. *)
+
+
+Section POrderAxioms.
+Variable (d : unit) (T : porderType d).
+
+Lemma lt_def (x y : T) : x < y = (y != x) && (x <= y).
+Proof. exact: lt_def_subdef. Qed.
+
+Lemma le_refl : reflexive (le : rel T).
+Proof. exact: le_refl_subdef. Qed.
+
+Lemma le_anti : antisymmetric (le : rel T).
+Proof. exact: le_anti_subdef. Qed.
+
+Lemma le_trans : transitive (le : rel T).
+Proof. exact: le_trans_subdef. Qed.
+
+Lemma infer_le (x y : T) : (x <= y) = (x <= y). Proof. by []. Qed.
+
+End POrderAxioms.
+
+Definition dual_bool := bool.
+HB.instance Definition _ := Choice.on dual_bool.
+
+Definition leb1 b1 b2 := b1 ==> b2.
+
+Definition leb2 (b1 b2 : bool) := b2 ==> b1.
+
+Program Definition leb1_order := @IsPOrdered.Build tt bool leb1 _ _ _ _ _.
+Next Obligation. Admitted.
+Next Obligation. Admitted.
+Next Obligation. Admitted.
+Next Obligation. Admitted.
+Next Obligation. Admitted.
+
+HB.instance Definition _ := leb1_order.
+
+Fact dual : unit -> unit. Proof. by []. Qed.
+Program Definition leb2_order := @IsPOrdered.Build (dual tt) dual_bool leb2 _ _ _ _ _.
+Next Obligation. Admitted.
+Next Obligation. Admitted.
+Next Obligation. Admitted.
+Next Obligation. Admitted.
+Next Obligation. Admitted.
+
+Notation "x <=^d y"  := (le_print_with (dual _) x y) (only printing) : order_scope.
+HB.instance Definition _ := leb2_order.
+
+Print Canonical Projections IsPOrdered.le_subdef.
+
+Arguments IsPOrdered.le_subdef : simpl never.
+
+Goal forall (P Q : bool -> Prop) (b1 b2 : bool), P (leb1 b1 b2) = Q (leb2 b2 b1).
+Proof.
+move=> P Q b1 b2.
+rewrite !infer_le.
+rewrite /=.
+have : P (b2 >= b1).
+rewrite /=.
+
+rewrite le_refl.
+rewrite [leb2 b2 b2]le_refl.
+
 
 HB.factory Record IsLePOrdered (d : unit) T of HasDecEq T := {
   le       : rel T;
