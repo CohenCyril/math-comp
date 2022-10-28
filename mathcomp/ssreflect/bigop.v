@@ -1097,6 +1097,25 @@ Proof. exact: big_nseq_cond. Qed.
 
 End Extensionality.
 
+Lemma big_rcons_op (R : Type) (idx : R) (op : R -> R -> R) (I : Type)
+    (i : I) (r : seq I) (P : pred I) (F : I -> R)
+    (idx' := if P i then op (F i) idx else idx) :
+  \big[op/idx]_(j <- rcons r i | P j) F j = \big[op/idx']_(j <- r | P j) F j.
+Proof. by elim: r => /= [|j r]; rewrite ?(big_nil, big_cons)// => ->. Qed.
+
+Lemma big_change_idx (R : Type) (idx : R) (op : Monoid.law idx) (I : Type)
+    (x : R)  (r : seq I) (P : pred I) (F : I -> R) :
+   \big[op/x]_(j <- r | P j) F j = op (\big[op/idx]_(j <- r | P j) F j) x.
+Proof.
+elim: r => [|i r]; rewrite ?(big_nil, big_cons, Monoid.mul1m)// => ->.
+by case: ifP => // Pi; rewrite Monoid.mulmA.
+Qed.
+Lemma big_rcons (R : Type) (idx : R) (op : Monoid.law idx) (I : Type)
+   i r (P : pred I) F :
+  \big[op/idx]_(j <- rcons r i | P j) F j =
+  op (\big[op/idx]_(j <- r | P j) F j) (if P i then F i else idx).
+Proof. by rewrite big_rcons_op big_change_idx Monoid.mulm1. Qed.
+
 Variant big_enum_spec (I : finType) (P : pred I) : seq I -> Type :=
   BigEnumSpec e of
     forall R idx op (F : I -> R),
@@ -1703,16 +1722,33 @@ Lemma big_allpairs I1 I2 (r1 : seq I1) (r2 : seq I2) F :
     \big[*%M/1]_(i1 <- r1) \big[op/idx]_(i2 <- r2) F (i1, i2).
 Proof. exact: big_allpairs_dep. Qed.
 
+Lemma big_only1 (I : finType) (i : I) (P : pred I) (F : I -> R) : P i ->
+    (forall j, j != i -> P j -> F j = idx) ->
+  \big[op/idx]_(j | P j) F j = F i.
+Proof.
+move=> Pi Fisx; have := index_enum_uniq I.
+have : i \in index_enum I by rewrite mem_index_enum.
+elim: index_enum => //= j r IHr /[!inE]; case: eqVneq => [<-|nij]//=.
+  move=> _ /andP[iNr runiq]; rewrite big_cons/= Pi big1_seq ?Monoid.mulm1//.
+  by move=> {}j /andP[/Fisx + jr] => ->//; apply: contraNneq iNr => <-.
+move=> ir /andP[jNr runiq]; rewrite big_cons IHr//.
+by case: ifPn => // /Fisx->; rewrite 1?eq_sym// Monoid.mul1m.
+Qed.
+
 Lemma big_pred1_eq (I : finType) (i : I) F :
   \big[*%M/1]_(j | j == i) F j = F i.
-Proof.
-have [e1 <- _ [e_enum _]] := big_enumP (pred1 i).
-by rewrite (perm_small_eq _ e_enum) enum1 ?big_seq1.
-Qed.
+Proof. by rewrite (@big_only1 _ i)// => j /negPf->. Qed.
 
 Lemma big_pred1 (I : finType) i (P : pred I) F :
   P =1 pred1 i -> \big[*%M/1]_(j | P j) F j = F i.
 Proof. by move/(eq_bigl _ _)->; apply: big_pred1_eq. Qed.
+
+Lemma big_ord1 F : \big[op/idx]_(i < 1) F i = F ord0.
+Proof. by rewrite big_ord_recl big_ord0 Monoid.mulm1. Qed.
+
+Lemma big_ord1_cond P F :
+  \big[op/idx]_(i < 1 | P i) F i = if P ord0 then F ord0 else idx.
+Proof. by rewrite big_mkcond big_ord1. Qed.
 
 Lemma big_ord1_eq (F : nat -> R) i n :
   \big[op/idx]_(j < n | j == i :> nat) F j = if i < n then F i else idx.
@@ -2111,6 +2147,7 @@ Arguments big_mkcond [R idx op I r].
 Arguments big1_eq [R idx op I].
 Arguments big1_seq [R idx op I].
 Arguments big1 [R idx op I].
+Arguments big_only1 {R idx op I} i [P F].
 Arguments big_pred1 [R idx op I] i [P F].
 Arguments perm_big [R idx op I r1] r2 [P F].
 Arguments big_uniq [R idx op I] r [F].

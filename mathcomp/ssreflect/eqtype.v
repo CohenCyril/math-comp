@@ -525,6 +525,31 @@ Notation "[ 'eta' f 'with' d1 , .. , dn ]" :=
   "'[hv' [ '[' 'eta' '/ '  f ']' '/'  'with'  '[' d1 , '/'  .. , '/'  dn ']' ] ']'"
   ) : fun_scope.
 
+Section DFunWith.
+Variables (I : eqType) (T : I -> Type) (f : forall i, T i).
+
+Definition dfwith i (x : T i) (j : I) : T j :=
+  if (i =P j) is ReflectT ij then ecast j (T j) ij x else f j.
+
+Lemma dfwithin i x : dfwith x i = x.
+Proof. by rewrite /dfwith; case: eqP => // ii; rewrite eq_axiomK. Qed.
+
+Lemma dfwithout i (x : T i) j : i != j -> dfwith x j = f j.
+Proof. by rewrite /dfwith; case: eqP. Qed.
+
+Variant dfwith_spec i (x : T i) : forall j, T j -> Type:=
+  | DFunWithin : dfwith_spec x x
+  | DFunWithout j : i != j -> dfwith_spec x (f j).
+
+Lemma dfwithP i (x : T i) (j : I) : dfwith_spec x (dfwith x j).
+Proof.
+by case: (eqVneq i j) => [<-|nij];
+   [rewrite dfwithin|rewrite dfwithout//]; constructor.
+Qed.
+
+End DFunWith.
+Arguments dfwith {I T} f [i] x.
+
 (* Various EqType constructions.                                         *)
 
 Section ComparableType.

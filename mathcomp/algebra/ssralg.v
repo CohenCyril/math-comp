@@ -1298,6 +1298,26 @@ rewrite -sum1_card; elim/big_rec3: _ => [|i x n _ _ ->]; first by rewrite mulr1.
 by rewrite exprS !mulrA mulN1r !mulNr commrX //; apply: commrN1.
 Qed.
 
+Lemma prodrM_comm {I : eqType} (r : seq I) (P : pred I) (x F : I -> R) :
+  (forall i j, P i -> P j -> comm (x i) (F j)) ->
+  \prod_(i <- r | P i) (x i * F i) =
+    \prod_(i <- r | P i) x i * \prod_(i <- r | P i) F i.
+Proof.
+move=> xF; elim: r => [|i r IHr]; rewrite !(big_nil, big_cons) ?mulr1//.
+case: ifPn => // Pi; rewrite IHr !mulrA; congr (_ * _); rewrite -!mulrA.
+by rewrite commr_prod // => j Pj; apply/commr_sym/xF.
+Qed.
+
+Lemma prodrMl_comm {I : finType} (A : pred I) (x : R) (F : I -> R) :
+  (forall i, A i -> comm x (F i)) ->
+  \prod_(i in A) (x * F i) = x ^+ #|A| * \prod_(i in A) F i.
+Proof. by move=> xF; rewrite prodrM_comm ?prodr_const// => i j _ /xF. Qed.
+
+Lemma prodrMr_comm {I : finType} (A : pred I) (x : R) (F : I -> R) :
+  (forall i, A i -> comm x (F i)) ->
+  \prod_(i in A) (F i * x) = \prod_(i in A) F i * x ^+ #|A|.
+Proof. by move=> xF; rewrite prodrM_comm ?prodr_const// => i j /xF. Qed.
+
 Lemma prodrMn (I : Type) (s : seq I) (P : pred I) (F : I -> R) (g : I -> nat) : 
   \prod_(i <- s | P i) (F i *+ g i) =
   \prod_(i <- s | P i) (F i) *+ \prod_(i <- s | P i) g i.
@@ -2630,6 +2650,19 @@ Proof. by rewrite (big_morph _ (exprMn n) (expr1n _ n)). Qed.
 Lemma prodr_undup_exp_count (I : eqType) r (P : pred I) (F : I -> R) :
   \prod_(i <- undup r | P i) F i ^+ count_mem i r = \prod_(i <- r | P i) F i.
 Proof. exact: big_undup_iterop_count.  Qed.
+
+Lemma prodrM {I : eqType} (r : seq I) (P : pred I) (x F : I -> R) :
+  \prod_(i <- r | P i) (x i * F i) =
+    \prod_(i <- r | P i) x i * \prod_(i <- r | P i) F i.
+Proof. by rewrite prodrM_comm// => i j _ _; apply: mulrC. Qed.
+
+Lemma prodrMl {I : finType} (A : pred I) (x : R) (F : I -> R) :
+  \prod_(i in A) (x * F i) = x ^+ #|A| * \prod_(i in A) F i.
+Proof. by rewrite prodrM ?prodr_const. Qed.
+
+Lemma prodrMr {I : finType} (A : pred I) (x : R) (F : I -> R) :
+  \prod_(i in A) (F i * x) = \prod_(i in A) F i * x ^+ #|A|.
+Proof. by rewrite prodrM ?prodr_const. Qed.
 
 Lemma exprDn x y n :
   (x + y) ^+ n = \sum_(i < n.+1) (x ^+ (n - i) * y ^+ i) *+ 'C(n, i).

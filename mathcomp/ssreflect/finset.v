@@ -1062,6 +1062,27 @@ End CartesianProd.
 
 Arguments setXP {fT1 fT2 A1 A2 x1 x2}.
 
+Section CartesianNProd.
+
+Variables (I : finType) (fT : I -> finType).
+Variables (A : forall i, {set fT i}).
+Implicit Types (x : {dffun forall i, fT i}).
+
+Definition setXn := [set x : {dffun _} in family A].
+
+Lemma in_setXn x : (x \in setXn) = [forall i, x i \in A i].
+Proof. by rewrite inE. Qed.
+
+Lemma setXnP x : reflect (forall i, x i \in A i) (x \in setXn).
+Proof. by rewrite inE; apply: forallP. Qed.
+
+Lemma cardsXn : #|setXn| = \prod_i #|A i|.
+Proof. by rewrite cardsE card_family foldrE big_map big_enum. Qed.
+
+End CartesianNProd.
+
+Arguments setXnP {I fT A x}.
+
 Local Notation imset_def :=
   (fun (aT rT : finType) f mD => [set y in @image_mem aT rT f mD]).
 Local Notation imset2_def :=
@@ -1396,6 +1417,19 @@ End FunImage.
 Arguments imsetP {aT rT f D y}.
 Arguments imset2P {aT aT2 rT f2 D1 D2 y}.
 Arguments imset_disjoint {aT rT f A B}.
+
+Lemma setXnS (I : finType) (T : I -> finType) (A B : forall i, {set T i}) :
+  (forall i, A i \subset B i) -> setXn A \subset setXn B.
+Proof.
+move=> sAB; apply/subsetP => x /setXnP xA.
+by apply/setXnP => i; apply/subsetP: (xA i).
+Qed.
+
+Lemma eq_setXn (I : finType) (T : I -> finType) (A B : forall i, {set T i}) :
+  (forall i, A i = B i) -> setXn A = setXn B.
+Proof.
+by move=> eqAB; apply/eqP; rewrite eqEsubset !setXnS// => j; rewrite eqAB.
+Qed.
 
 Section BigOps.
 
