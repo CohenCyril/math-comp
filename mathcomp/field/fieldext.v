@@ -523,23 +523,6 @@ Proof. by move/field_module_dimS/divnK. Qed.
 Lemma dim_sup_field F E : (F <= E)%VS -> \dim E = (\dim_F E * \dim F)%N.
 Proof. by move/field_dimS/divnK. Qed.
 
-Lemma big_prod_subfield_seqP (I : eqType) (r : seq I) (P : {pred I})
-   (U : I -> {vspace L}) (W : {subfield L}) : uniq r ->
-  reflect (forall u : I -> L, (forall i, P i -> u i \in U i) ->
-                               \prod_(i <- r | P i) u i \in W)
-          (\big[@prodv _ _/1%VS]_(i <- r | P i) U i <= W)%VS.
-Proof.
-move=> /big_prodv_seqP/iffP; apply => // [WP u uU|WP u v uU vV].
-  by apply: WP; rewrite ?mem1v.
-by rewrite big_change_idx/= memvM ?WP//; apply/subvP: uU; rewrite sub1v.
-Qed.
-
-Lemma big_prod_subfieldP (I : finType) (D : {pred I})
-   (U : I -> {vspace L}) (W : {subfield L}) :
-  reflect (forall u : I -> L, (forall i, D i -> u i \in U i) ->
-                               \prod_(i in D) u i \in W)
-          (\big[@prodv _ _/1%VS]_(i in D) U i <= W)%VS.
-Proof. by apply/big_prod_subfield_seqP/index_enum_uniq. Qed.
 
 Lemma field_module_semisimple F M (m := \dim_F M) :
     (F * M <= M)%VS ->
@@ -1707,7 +1690,7 @@ Qed.
 (*Coq 8.3 processes this shorter proof correctly, but then crashes on Qed.
   In Coq 8.4 Qed takes about 18s.
   In Coq 8.7, everything seems to be all right *)
-(*
+
 Lemma Xirredp_FAdjoin' (F : fieldType) (p : {poly F}) :
     irreducible_poly p ->
   {L : fieldExtType F & Vector.dim L = (size p).-1 &
@@ -1770,4 +1753,4 @@ exists (map_poly iota (rVpoly x)).
   by apply/polyOverP=> i; rewrite coef_map memvZ ?mem1v.
 by apply/(can_inj rVpolyK); rewrite q_z modp_small // -Dn ltnS size_poly.
 Qed.
-*)
+
