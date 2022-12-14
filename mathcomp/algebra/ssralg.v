@@ -1562,7 +1562,7 @@ Section RightRegular.
 Variable R : ringType.
 Implicit Types x y : R.
 
-HB.instance Definition _ := Zmodule.copy R^c R.
+HB.instance Definition _ := Zmodule.on R^c .
 
 HB.instance Definition _ :=
   let mul' x y := y * x in
@@ -1744,7 +1744,7 @@ Section LalgebraTheory.
 Variables (R : ringType) (A : lalgType R).
 Implicit Types x y : A.
 
-HB.instance Definition _ := Ring.copy R^o R.
+HB.instance Definition _ := Ring.on R^o.
 
 HB.instance Definition _ := @Zmodule_isLmodule.Build R R^o
   (@mul R) (@mulrA R) (@mul1r R) (@mulrDr R) (fun v a b => mulrDl a b v).
@@ -2606,8 +2606,7 @@ Variables (R : comRingType) (A : algType R).
 HB.instance Definition converse_ : Ring_hasCommutativeMul R^c :=
   Ring_hasCommutativeMul.Build R^c (fun _ _ => mulrC _ _).
 #[export]
-HB.instance Definition regular_comRingType : Ring_hasCommutativeMul R^o :=
-  Ring_hasCommutativeMul.Build R^o mulrC.
+HB.instance Definition regular_comRingType := ComRing.on R^o.
 #[export]
 HB.instance Definition regular_comAlgType : is_ComAlgebra R R^o :=
   is_ComAlgebra.Build R R^o.
@@ -2877,9 +2876,7 @@ Implicit Types x y : R.
 
 HB.instance Definition xxx1 : Ring_hasMulInverse R^c :=
   Ring_hasMulInverse.Build R^c (@mulrV R) (@mulVr R) (@rev_unitrP R) (@invr_out R).
-HB.instance Definition xxx2 : Ring_hasMulInverse R^o :=
-  Ring_hasMulInverse.Build R^o (@mulVr R) (@mulrV R)
-    (@unitrP_subproof R) (@invr_out R).
+HB.instance Definition xxx2 := UnitRing.on R^o.
 End UnitRingTheory.
 End RegularConverseUnitRingExports.
 HB.export RegularConverseUnitRingExports.
@@ -3031,7 +3028,6 @@ Section ComUnitRingTheory.
 
 Variable R : comUnitRingType.
 Implicit Types x y : R.
-
 (* TODO: HB.recover_all_instances (R^o). *)
 HB.instance Definition _ : Ring_hasMulInverse (R^c) := xxx1 R.
 HB.instance Definition _ : Ring_hasMulInverse (R^o) := xxx2 R.
@@ -3895,15 +3891,7 @@ Proof. by apply: (iffP idP) => [/mulIf | /rreg_neq0]. Qed.
 
 End IntegralDomainTheory.
 
-Module RegularIdomainExports.
-Section IntegralDomainTheory.
-Variable R : idomainType.
-(* TODO: HB.instance Definition _ : ComUnitRing_isIntegral R^o := alias R. *)
-HB.instance Definition regular_integral : ComUnitRing_isIntegral R^o :=
-  ComUnitRing_isIntegral.Build (R^o) mulf_eq0_subproof.
-End IntegralDomainTheory.
-End RegularIdomainExports.
-HB.export RegularIdomainExports.
+#[export] HB.instance Definition _ (R : idomainType) := IntegralDomain.on R^o.
 
 Arguments lregP {R x}.
 Arguments rregP {R x}.
