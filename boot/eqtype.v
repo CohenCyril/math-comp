@@ -134,13 +134,16 @@ From mathcomp Require Import ssreflect ssrfun ssrbool.
 Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
+Set Universe Polymorphism.
+Set Printing Universes.
 
 Declare Scope eq_scope.
 Declare Scope fun_delta_scope.
 
 Definition eq_axiom T (e : rel T) := forall x y, reflect (x = y) (e x y).
 
-HB.mixin Record hasDecEq T := { eq_op : rel T; eqP : eq_axiom eq_op }.
+
+HB.mixin Record hasDecEq (T : Type) := { eq_op : rel T; eqP : eq_axiom eq_op }.
 
 #[mathcomp(axiom="eq_axiom"), short(type="eqType")]
 HB.structure Definition Equality := { T of hasDecEq T }.
