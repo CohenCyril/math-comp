@@ -302,7 +302,7 @@ Proof. by move=> eq_x_x; apply: eq_irrelevance. Qed.
 (* We use the module system to circumvent a silly limitation that  *)
 (* forbids using the same constant to coerce to different targets. *)
 Module Type EqTypePredSig.
-Parameter sort : eqType -> predArgType.
+Parameter sort@{u} : eqType@{u} -> predArgType@{u}.
 End EqTypePredSig.
 Module MakeEqTypePred (eqmod : EqTypePredSig).
 Coercion eqmod.sort : eqType >-> predArgType.
@@ -761,10 +761,10 @@ Variables (T : Type) (eT : eqType) (f : T -> eT).
 Lemma inj_eqAxiom : injective f -> Equality.axiom (fun x y => f x == f y).
 Proof. by move=> f_inj x y; apply: (iffP eqP) => [|-> //]; apply: f_inj. Qed.
 
-HB.instance Definition _ f_inj := hasDecEq.Build (inj_type f_inj)
+Definition foo f_inj := hasDecEq.Build (inj_type f_inj)
   (inj_eqAxiom f_inj).
 
-HB.instance Definition _ g (fK : pcancel f g) := Equality.copy (pcan_type fK)
+Definition foo' g (fK : pcancel f g) := Equality.copy (pcan_type fK)
   (inj_type (pcan_inj fK)).
 
 HB.instance Definition _ g (fK : cancel f g) := Equality.copy (can_type fK)
