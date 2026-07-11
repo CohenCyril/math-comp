@@ -1,6 +1,6 @@
 { mathcomp, rocqnavi, graphviz, version ? null }:
 (mathcomp.override {single = true; withDoc = true; }).overrideAttrs (old: {
-  nativeBuildInputs = [ graphviz rocqnavi ];
+  nativeBuildInputs = old.nativeBuildInputs ++ [ graphviz rocqnavi ];
   preBuild = old.preBuild
     + ''
       if [[ -f etc/rocqnavi_generate-hierarchy-graph.sh ]] then
